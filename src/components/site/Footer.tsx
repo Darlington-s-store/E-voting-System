@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { Logo } from "@/components/shared/Logo";
 import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 

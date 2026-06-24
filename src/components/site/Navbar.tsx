@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
@@ -22,51 +22,37 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", f);
   }, []);
   return (
-    <header
-      className={`sticky top-0 z-50 transition-all ${
-        scrolled ? "glass shadow-soft" : "bg-transparent"
-      }`}
-    >
+    <header className={`sticky top-0 z-50 transition-all ${scrolled ? "glass shadow-soft" : "bg-transparent"}`}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Logo />
         <div className="hidden md:flex items-center gap-1">
           {links.map((l) => (
-            <Link
+            <NavLink
               key={l.to}
               to={l.to}
-              className="px-3 py-2 text-sm font-medium text-foreground/80 hover:text-brand transition-colors"
-              activeProps={{ className: "px-3 py-2 text-sm font-semibold text-brand" }}
-              activeOptions={{ exact: true }}
+              end={l.to === "/"}
+              className={({ isActive }) =>
+                `px-3 py-2 text-sm font-medium transition-colors ${
+                  isActive ? "text-brand font-semibold" : "text-foreground/80 hover:text-brand"
+                }`
+              }
             >
               {l.label}
-            </Link>
+            </NavLink>
           ))}
         </div>
         <div className="hidden md:flex items-center gap-2">
-          <Link to="/login">
-            <Button variant="ghost" className="text-foreground/80 hover:text-brand">Admin Login</Button>
-          </Link>
-          <Link to="/login">
-            <Button className="bg-brand text-white hover:bg-brand/90">Voter Login</Button>
-          </Link>
+          <Link to="/login"><Button variant="ghost">Admin Login</Button></Link>
+          <Link to="/login"><Button className="bg-brand text-white hover:bg-brand/90">Voter Login</Button></Link>
         </div>
-        <button
-          className="md:hidden p-2 rounded-md hover:bg-muted"
-          onClick={() => setOpen(!open)}
-          aria-label="Menu"
-        >
+        <button className="md:hidden p-2 rounded-md hover:bg-muted" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
       {open && (
         <div className="md:hidden bg-card border-t border-border px-4 py-4 space-y-2">
           {links.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="block py-2 text-sm font-medium"
-              onClick={() => setOpen(false)}
-            >
+            <Link key={l.to} to={l.to} className="block py-2 text-sm font-medium" onClick={() => setOpen(false)}>
               {l.label}
             </Link>
           ))}
