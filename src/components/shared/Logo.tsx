@@ -1,5 +1,5 @@
+import { Link } from "react-router-dom";
 import { Shield } from "lucide-react";
-import { Link } from "@tanstack/react-router";
 
 export function Logo({ light = false }: { light?: boolean }) {
   return (
@@ -9,7 +9,7 @@ export function Logo({ light = false }: { light?: boolean }) {
           light ? "bg-white/15" : "gradient-brand"
         } shadow-soft`}
       >
-        <Shield className={`w-5 h-5 ${light ? "text-white" : "text-white"}`} strokeWidth={2.5} />
+        <Shield className="w-5 h-5 text-white" strokeWidth={2.5} />
       </div>
       <span
         className={`font-extrabold text-lg tracking-tight ${
