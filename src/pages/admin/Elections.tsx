@@ -250,7 +250,7 @@ export default function AdminElections() {
                           <DropdownMenuItem onClick={() => startEdit(e)}>
                             <Edit2 className="w-4 h-4 mr-2" /> Edit Details
                           </DropdownMenuItem>
-                          {e.status === "draft" && (
+                          {(e.status === "draft" || e.status === "scheduled") && (
                             <DropdownMenuItem
                               onClick={() => setConfirmAction({ type: "open", id: e.id })}
                             >

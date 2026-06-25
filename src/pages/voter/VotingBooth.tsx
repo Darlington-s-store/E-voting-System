@@ -309,64 +309,94 @@ export default function VotingBooth() {
                     <div
                       key={c.id}
                       onClick={() => setSelections({ ...selections, [currentPosition.id]: c.id })}
-                      className={`text-left rounded-2xl p-5 border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                      className={`relative text-left rounded-2xl p-5 border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                         selected
-                          ? "border-brand bg-brand/5 shadow-md scale-[1.01]"
+                          ? "shadow-md scale-[1.01]"
                           : isAnySelected
-                            ? "border-border/60 bg-card opacity-65 hover:opacity-100 hover:border-brand/40"
-                            : "border-border bg-card hover:border-brand/40 hover:-translate-y-0.5 shadow-soft"
+                            ? "opacity-65 hover:opacity-100 hover:-translate-y-0.5"
+                            : "hover:-translate-y-0.5 shadow-soft"
                       }`}
+                      style={{
+                        borderColor: selected ? "#2E86AB" : "#E2E8F0",
+                        backgroundColor: selected ? "rgba(46, 134, 171, 0.05)" : "#FFFFFF",
+                      }}
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-3">
-                          <img
-                            src={c.photo}
-                            alt={c.name}
-                            className="w-16 h-16 rounded-full object-cover border border-border/80 shadow-sm"
-                          />
-                          <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                              selected
-                                ? "border-brand bg-brand text-white shadow-sm"
-                                : "border-muted-foreground/30 bg-card"
-                            }`}
-                          >
-                            {selected && <CheckCircle2 className="w-4.5 h-4.5" />}
-                          </div>
+                        {/* Top-right corner checkmark selection */}
+                        <div className="absolute top-4 right-4">
+                          {selected ? (
+                            <div className="w-6 h-6 rounded-full bg-[#2E86AB] flex items-center justify-center text-white shadow-sm border border-[#2E86AB]">
+                              <CheckCircle2 className="w-4 h-4 text-white fill-current" />
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full border border-slate-300 bg-white" />
+                          )}
                         </div>
-                        <h3 className="mt-4 font-bold text-base text-foreground">{c.name}</h3>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide block mt-0.5">
-                          PORTFOLIO CANDIDATE
-                        </span>
-                        <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed line-clamp-3">
+
+                        {/* Candidate photo */}
+                        <div className="flex justify-center w-full mt-2">
+                          <img
+                            src={
+                              c.photo ||
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                c.name,
+                              )}&background=2E86AB&color=fff&bold=true&size=256`
+                            }
+                            alt={c.name}
+                            className={`w-[100px] h-[100px] rounded-full object-cover border border-border/80 shadow-sm transition-all duration-300 ${
+                              selected ? "outline outline-[3px] outline-[#2E86AB]" : ""
+                            }`}
+                          />
+                        </div>
+
+                        {/* Candidate name */}
+                        <h3 className="mt-4 font-bold text-[18px] text-center text-foreground">
+                          {c.name}
+                        </h3>
+
+                        {/* Position badge */}
+                        <div className="flex justify-center mt-1.5">
+                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#2E86AB]/10 text-[#2E86AB] uppercase tracking-wide">
+                            {currentPosition.name}
+                          </span>
+                        </div>
+
+                        {/* Tagline/slogan */}
+                        <p className="mt-3 text-[14px] italic text-muted-foreground text-center line-clamp-2 h-10 leading-snug">
+                          "{c.campaignMessage || "Empowering representation, moving forward."}"
+                        </p>
+
+                        {/* Bio excerpt */}
+                        <p className="mt-4 text-[13px] text-muted-foreground text-left line-clamp-3 h-[60px] leading-relaxed">
                           {c.bio || "No biography provided by candidate."}
                         </p>
                       </div>
 
-                      {/* Links block */}
-                      <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between text-[11px] font-bold text-brand">
-                        <button
+                      {/* Buttons row */}
+                      <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between gap-2.5 w-full">
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             setActiveCandidateId(c.id);
                           }}
-                          className="hover:underline"
+                          className="flex-1 h-8 text-xs font-semibold border-slate-200 text-slate-700 hover:bg-slate-50"
                         >
-                          View Full Profile
-                        </button>
-                        {c.manifesto && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toast.info(`Downloading manifesto: ${c.manifesto}`);
-                            }}
-                            className="hover:underline flex items-center gap-1 text-muted-foreground hover:text-brand"
-                          >
-                            <FileText className="w-3 h-3" /> Manifesto
-                          </button>
-                        )}
+                          View Profile
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelections({ ...selections, [currentPosition.id]: c.id });
+                          }}
+                          className="flex-1 h-8 text-xs font-bold bg-[#2E86AB] hover:bg-[#2E86AB]/90 text-white shadow-sm"
+                        >
+                          {selected ? "✓ Selected" : `Select ${c.name.split(" ")[0]}`}
+                        </Button>
                       </div>
                     </div>
                   );

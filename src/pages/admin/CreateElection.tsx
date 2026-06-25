@@ -501,15 +501,17 @@ export default function CreateElection() {
                 });
                 const computedEligibleCount = matchingVoters.length;
 
+                const startDateVal = form.startDate ? new Date(form.startDate) : new Date();
+                const now = new Date();
+                const isPastOrPresent = startDateVal.getTime() <= now.getTime() + 60000;
+
                 const newElection = {
                   id: `e-new-${Date.now()}`,
                   name: form.name || "Untitled Election",
                   description: form.description || "No description provided.",
                   type: form.type as "General" | "By-Election" | "Referendum" | "Campus Awards",
-                  status: "scheduled" as const,
-                  startDate: form.startDate
-                    ? new Date(form.startDate).toISOString()
-                    : new Date().toISOString(),
+                  status: isPastOrPresent ? ("open" as const) : ("scheduled" as const),
+                  startDate: startDateVal.toISOString(),
                   endDate: form.endDate
                     ? new Date(form.endDate).toISOString()
                     : new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),

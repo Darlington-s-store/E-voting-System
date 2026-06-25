@@ -1,4 +1,5 @@
 import { Link, useParams } from "react-router-dom";
+import { useState } from "react";
 import { format } from "date-fns";
 import {
   ChevronLeft,
@@ -9,17 +10,32 @@ import {
   Users,
   Briefcase,
 } from "lucide-react";
-import { getElection, getPositionsForElection } from "@/lib/mock-data";
+import { getElection, getPositionsForElection, elections, saveElections } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { toast } from "sonner";
 
 export default function ElectionDetail() {
   const { id = "" } = useParams();
-  const e = getElection(id);
-  if (!e) return <div>Election not found</div>;
-  const positions = getPositionsForElection(e.id);
-  const pct = Math.round((e.votesCast / e.totalEligible) * 100);
+  const [election, setElection] = useState(() => getElection(id));
+
+  if (!election) return <div>Election not found</div>;
+
+  const positions = getPositionsForElection(election.id);
+  const pct =
+    election.totalEligible > 0
+      ? Math.round((election.votesCast / election.totalEligible) * 100)
+      : 0;
+
+  const updateStatus = (newStatus: "open" | "closed" | "archived") => {
+    const idx = elections.findIndex((x) => x.id === election.id);
+    if (idx !== -1) {
+      elections[idx] = { ...elections[idx], status: newStatus };
+      saveElections();
+      setElection(elections[idx]);
+      toast.success(`Election status updated to ${newStatus}`);
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -33,37 +49,28 @@ export default function ElectionDetail() {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-extrabold">{e.name}</h1>
-            <StatusBadge status={e.status} />
+            <h1 className="text-2xl font-extrabold">{election.name}</h1>
+            <StatusBadge status={election.status} />
           </div>
-          <p className="text-muted-foreground mt-1">{e.description}</p>
+          <p className="text-muted-foreground mt-1">{election.description}</p>
         </div>
         <div className="flex gap-2">
-          {e.status === "draft" && (
-            <Button
-              className="bg-success text-white"
-              onClick={() => toast.success("Election opened")}
-            >
+          {(election.status === "draft" || election.status === "scheduled") && (
+            <Button className="bg-success text-white" onClick={() => updateStatus("open")}>
               <PlayCircle className="w-4 h-4 mr-2" /> Open Election
             </Button>
           )}
-          {e.status === "open" && (
-            <Button
-              className="bg-warning text-white"
-              onClick={() => toast.success("Election closed")}
-            >
+          {election.status === "open" && (
+            <Button className="bg-warning text-white" onClick={() => updateStatus("closed")}>
               <StopCircle className="w-4 h-4 mr-2" /> Close Election
             </Button>
           )}
-          {e.status === "closed" && (
-            <Button
-              className="bg-brand text-white"
-              onClick={() => toast.success("Results published")}
-            >
+          {election.status === "closed" && (
+            <Button className="bg-brand text-white" onClick={() => updateStatus("archived")}>
               <Send className="w-4 h-4 mr-2" /> Publish Results
             </Button>
           )}
-          <Link to={`/admin/elections/${e.id}/results`}>
+          <Link to={`/admin/elections/${election.id}/results`}>
             <Button variant="outline">
               <BarChart3 className="w-4 h-4 mr-2" /> View Results
             </Button>
@@ -72,8 +79,8 @@ export default function ElectionDetail() {
       </div>
 
       <div className="grid sm:grid-cols-4 gap-4">
-        <Stat label="Total Eligible" value={e.totalEligible.toLocaleString()} icon={Users} />
-        <Stat label="Votes Cast" value={e.votesCast.toLocaleString()} icon={BarChart3} />
+        <Stat label="Total Eligible" value={election.totalEligible.toLocaleString()} icon={Users} />
+        <Stat label="Votes Cast" value={election.votesCast.toLocaleString()} icon={BarChart3} />
         <Stat label="Turnout" value={`${pct}%`} icon={BarChart3} />
         <Stat label="Positions" value={String(positions.length)} icon={Briefcase} />
       </div>
@@ -83,11 +90,11 @@ export default function ElectionDetail() {
         <div className="grid sm:grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Starts: </span>
-            <span className="font-semibold">{format(new Date(e.startDate), "PPp")}</span>
+            <span className="font-semibold">{format(new Date(election.startDate), "PPp")}</span>
           </div>
           <div>
             <span className="text-muted-foreground">Ends: </span>
-            <span className="font-semibold">{format(new Date(e.endDate), "PPp")}</span>
+            <span className="font-semibold">{format(new Date(election.endDate), "PPp")}</span>
           </div>
         </div>
       </div>
