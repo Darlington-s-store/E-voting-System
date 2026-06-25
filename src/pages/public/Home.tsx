@@ -81,11 +81,11 @@ const steps = [
 
 const testimonials = [
   {
-    name: "University of Lagos",
+    name: "Riverside University",
     quote:
       "E-voting system transformed our student elections. Turnout doubled and we eliminated all disputes.",
     role: "Office of Student Affairs",
-    avatar: "UL",
+    avatar: "RU",
   },
   {
     name: "Grace Cathedral",
