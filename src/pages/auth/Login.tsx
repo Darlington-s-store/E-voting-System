@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
-import { AuthShell } from "@/components/shared/AuthShell";
+import { Eye, EyeOff, Loader2, GraduationCap, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/auth-store";
 import { toast } from "sonner";
+import { Logo } from "@/components/shared/Logo";
 
-type FormData = { indexNumber: string; password: string; remember: boolean };
+type FormData = { indexNumber: string; password: string };
 
 export default function Login() {
   const {
@@ -19,7 +18,6 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormData>();
   const [showPwd, setShowPwd] = useState(false);
-  const [attempts, setAttempts] = useState(0);
   const [loading, setLoading] = useState(false);
   const login = useAuth((s) => s.login);
   const nav = useNavigate();
@@ -27,107 +25,107 @@ export default function Login() {
   const onSubmit = (data: FormData) => {
     setLoading(true);
     setTimeout(() => {
-      const isAdmin = data.indexNumber.toLowerCase().includes("admin");
-      const role = isAdmin ? "admin" : "voter";
       login({
         id: "u-" + Date.now(),
         name: data.indexNumber,
         email: data.indexNumber + "@student.edu",
-        role,
+        role: "voter",
         token: "sess-" + Date.now(),
         studentId: data.indexNumber,
         department: "",
         faculty: "",
         level: "",
         phone: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.indexNumber)}&background=022C22&color=fff&bold=true`,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.indexNumber)}&background=1E3A5F&color=fff&bold=true`,
         twoFAEnabled: false,
       });
       toast.success("Signed in successfully");
-      nav(isAdmin ? "/admin/dashboard" : "/voter/dashboard", { replace: true });
+      nav("/voter/dashboard", { replace: true });
       setLoading(false);
-    }, 600);
+    }, 500);
   };
 
-  const onError = () => setAttempts((n) => n + 1);
-
   return (
-    <AuthShell
-      title="Welcome Back"
-      subtitle="Sign in to your E-voting System account"
-      footer={
-        <div className="space-y-3">
-          <div>
-            Don't have an account?{" "}
-            <Link to="/register" className="text-brand font-semibold hover:underline">
-              Create one
-            </Link>
-          </div>
-          <div className="pt-2.5 border-t border-border/60">
-            Are you an Administrator?{" "}
-            <Link to="/admin/login" className="text-brand font-bold hover:underline">
-              Access Admin Portal
-            </Link>
+    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center gap-3 mb-6">
+          <Logo />
+          <div className="text-center">
+            <h1 className="text-2xl font-extrabold tracking-tight">Student Sign In</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Use your index number and password to vote
+            </p>
           </div>
         </div>
-      }
-    >
-      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
-        {attempts >= 3 && (
-          <div className="flex items-start gap-2 p-3 rounded-md bg-danger/10 text-danger text-sm">
-            <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-            <div>Too many attempts. Try again in 5 minutes.</div>
-          </div>
-        )}
-        <div className="space-y-2">
-          <Label>
-            Index Number <span className="text-danger">*</span>
-          </Label>
-          <Input
-            type="text"
-            placeholder="e.g. SC/2022/01034"
-            {...register("indexNumber", { required: "Index number is required" })}
-          />
-          {errors.indexNumber && (
-            <p className="text-xs text-danger">{errors.indexNumber.message}</p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <Label>
-            Password <span className="text-danger">*</span>
-          </Label>
-          <div className="relative">
-            <Input
-              type={showPwd ? "text" : "password"}
-              placeholder="••••••••"
-              {...register("password", { required: "Password is required" })}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPwd(!showPwd)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+
+        <div className="bg-card border border-border rounded-2xl shadow-soft p-6 sm:p-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="indexNumber" className="flex items-center gap-1.5">
+                <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                Index Number
+              </Label>
+              <Input
+                id="indexNumber"
+                type="text"
+                placeholder="e.g. SC/2022/01034"
+                autoComplete="username"
+                {...register("indexNumber", { required: "Index number is required" })}
+              />
+              {errors.indexNumber && (
+                <p className="text-xs text-danger">{errors.indexNumber.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPwd ? "text" : "password"}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  {...register("password", { required: "Password is required" })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(!showPwd)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-label="Toggle password"
+                >
+                  {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-danger">{errors.password.message}</p>
+              )}
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-xs text-brand hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 bg-brand text-white hover:bg-brand/90"
             >
-              {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-          {errors.password && <p className="text-xs text-danger">{errors.password.message}</p>}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
+            </Button>
+          </form>
         </div>
-        <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Checkbox {...register("remember")} /> Remember me
-          </label>
-          <Link to="/forgot-password" className="text-brand hover:underline">
-            Forgot password?
+
+        <div className="mt-6 text-center text-sm">
+          <Link
+            to="/admin/login"
+            className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-brand transition-colors"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Administrator sign in
           </Link>
         </div>
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 bg-brand text-white hover:bg-brand/90"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
-        </Button>
-      </form>
-    </AuthShell>
+      </div>
+    </div>
   );
 }
