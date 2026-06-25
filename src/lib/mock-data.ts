@@ -313,17 +313,83 @@ const awardPositions: Position[] = [
   },
 ];
 
-const defaultPositions: Position[] = [];
+const defaultPositions: Position[] = [...initialPositions.map(makePosition), ...awardPositions];
 
-const defaultElections: Election[] = [];
+const defaultElections: Election[] = [
+  {
+    id: "e1",
+    name: "2025 Student Union Elections",
+    description: "Annual election for the student union executive council.",
+    type: "General",
+    status: "open",
+    startDate: "2026-06-20T08:00:00Z",
+    endDate: "2026-06-28T20:00:00Z",
+    positionIds: ["p1", "p2", "p3", "p4", "p5", "p6"],
+    totalEligible: 12480,
+    votesCast: 8421,
+  },
+  {
+    id: "e2",
+    name: "Faculty Council Elections",
+    description: "Selection of faculty council representatives.",
+    type: "General",
+    status: "scheduled",
+    startDate: "2026-07-10T08:00:00Z",
+    endDate: "2026-07-15T20:00:00Z",
+    positionIds: ["p1", "p3", "p4"],
+    totalEligible: 4200,
+    votesCast: 0,
+  },
+  {
+    id: "e-awards",
+    name: "Campus Awards 2026",
+    description: "Celebrating student excellence and talent across campus.",
+    type: "Campus Awards",
+    status: "open",
+    startDate: "2026-06-20T08:00:00Z",
+    endDate: "2026-06-28T20:00:00Z",
+    positionIds: ["a1", "a2", "a3", "a4", "a5"],
+    totalEligible: 12480,
+    votesCast: 4210,
+  },
+];
 
-export const awardCategoriesPresets: string[] = [];
+export const awardCategoriesPresets: string[] = [
+  "Best Dressed Male",
+  "Best Dressed Female",
+  "Face of the Campus",
+  "Most Hardworking Student",
+  "Campus Comedian",
+  "Student Artiste of the Year",
+  "Student Influencer of the Year",
+  "Sports Personality of the Year",
+  "Most Popular Student",
+  "Outstanding Student Leader",
+  "Tech Genius of the Year",
+  "Entrepreneur of the Year",
+];
 
-const candidateNames: Record<string, string[]> = {};
+const candidateNames: Record<string, string[]> = {
+  p1: ["Amara Okafor", "Daniel Mensah", "Fatima Bello"],
+  p2: ["Kwame Boateng", "Chioma Eze"],
+  p3: ["Ifeoma Nwosu", "Kojo Asante", "Linda Adams"],
+  p4: ["Yusuf Idris", "Grace Owusu"],
+  p5: ["Esi Quartey", "Tunde Akin", "Ama Serwaa"],
+  p6: ["Nana Akoto", "Zainab Musa"],
+};
 
-const awardNominees: { positionId: string; name: string }[] = [];
-
-const defaultCandidates: Candidate[] = [];
+const awardNominees: { positionId: string; name: string }[] = [
+  { positionId: "a1", name: "Kofi Owusu" },
+  { positionId: "a1", name: "David Tetteh" },
+  { positionId: "a2", name: "Abena Mansa" },
+  { positionId: "a2", name: "Naa Ayeley" },
+  { positionId: "a3", name: "Prince Osei" },
+  { positionId: "a3", name: "Blessing Alao" },
+  { positionId: "a4", name: "Kwaku Mensah" },
+  { positionId: "a4", name: "Emeka Obi" },
+  { positionId: "a5", name: "Uncle Rich" },
+  { positionId: "a5", name: "Comedian Waris" },
+];
 
 export const departments = [
   "Computer Science",
@@ -333,6 +399,7 @@ export const departments = [
   "Medicine",
   "Arts",
 ];
+
 export const faculties = [
   "Science",
   "Business",
@@ -341,7 +408,9 @@ export const faculties = [
   "Health Sciences",
   "Humanities",
 ];
+
 export const levels = ["100", "200", "300", "400", "500"];
+
 const firstNames = [
   "Ada",
   "Tunde",
@@ -356,6 +425,7 @@ const firstNames = [
   "Sade",
   "Kojo",
 ];
+
 const lastNames = [
   "Okeke",
   "Mensah",
@@ -369,22 +439,134 @@ const lastNames = [
   "Quaye",
 ];
 
-const defaultVoters: Voter[] = [];
+const defaultCandidates: Candidate[] = [
+  ...Object.entries(candidateNames).flatMap(([positionId, names]) =>
+    names.map((name, i) => ({
+      id: `c-${positionId}-${i}`,
+      name,
+      positionId,
+      electionId: "e1",
+      bio: `Dedicated student leader with a track record of organizing campus initiatives, advocating for student welfare, and driving real change.`,
+      campaignMessage: `A vote for ${name.split(" ")[0]} is a vote for transparency, progress, and unity on our campus.`,
+      photo: avatar(name),
+      votes: Math.floor(200 + Math.random() * 2200),
+      status: "active" as const,
+    })),
+  ),
+  ...awardNominees.map((nom, i) => ({
+    id: `c-${nom.positionId}-${i}`,
+    name: nom.name,
+    positionId: nom.positionId,
+    electionId: "e-awards",
+    bio: `Passionate nominee for the ${nom.positionId} category. Thank you for your support!`,
+    campaignMessage: `Support excellence, support ${nom.name.split(" ")[0]}!`,
+    photo: avatar(nom.name),
+    votes: Math.floor(100 + Math.random() * 1500),
+    status: "active" as const,
+  })),
+];
 
-export const auditLogs: AuditLog[] = [];
+const defaultVoters: Voter[] = Array.from({ length: 120 }, (_, i) => {
+  const name = `${firstNames[i % firstNames.length]} ${lastNames[(i * 3) % lastNames.length]}`;
+  return {
+    id: `v${i + 1}`,
+    name,
+    studentId: `SC/2022/${String(1000 + i).padStart(5, "0")}`,
+    email: `${name.toLowerCase().replace(" ", ".")}${i}@uni.edu`,
+    department: departments[i % departments.length],
+    faculty: faculties[i % faculties.length],
+    level: levels[i % levels.length],
+    status: i % 17 === 0 ? "suspended" : "active",
+    lastLogin: new Date(Date.now() - i * 36e5).toISOString(),
+    avatar: avatar(name),
+  };
+});
 
-const defaultNotifications: AppNotification[] = [];
+export const auditLogs: AuditLog[] = Array.from({ length: 40 }, (_, i) => {
+  const actions: AuditLog["action"][] = ["LOGIN", "VOTE", "CREATE", "UPDATE", "DELETE"];
+  const action = actions[i % actions.length];
+  const fallbackVoterName =
+    firstNames[i % firstNames.length] + " " + lastNames[(i * 2) % lastNames.length];
+  return {
+    id: `log-${i}`,
+    timestamp: new Date(Date.now() - i * 13 * 60000).toISOString(),
+    user: fallbackVoterName,
+    role: i % 6 === 0 ? "admin" : "voter",
+    action,
+    entity: action === "VOTE" ? "Election e1" : action === "LOGIN" ? "Auth" : "Position p3",
+    ip: `196.${i % 255}.${(i * 3) % 255}.${(i * 7) % 255}`,
+    details: `${action} performed successfully`,
+  };
+});
 
-export const votesByDay: { day: string; votes: number }[] = [];
+const defaultNotifications: AppNotification[] = [
+  {
+    id: "n1",
+    type: "info",
+    title: "Election starts soon",
+    message: "Student Union Elections opens in 2 hours.",
+    time: "2h ago",
+    read: false,
+  },
+  {
+    id: "n2",
+    type: "success",
+    title: "Vote recorded",
+    message: "Your vote for President has been recorded.",
+    time: "1d ago",
+    read: false,
+  },
+  {
+    id: "n3",
+    type: "warning",
+    title: "Profile incomplete",
+    message: "Please add a phone number to your profile.",
+    time: "3d ago",
+    read: true,
+  },
+  {
+    id: "n4",
+    type: "alert",
+    title: "New login detected",
+    message: "Sign-in from Chrome on Windows.",
+    time: "5d ago",
+    read: true,
+  },
+  {
+    id: "n5",
+    type: "info",
+    title: "Faculty Council scheduled",
+    message: "Mark your calendar for July 10.",
+    time: "1w ago",
+    read: true,
+  },
+];
 
-export const electionStatusBreakdown: { name: string; value: number; color: string }[] = [];
+export const votesByDay = [
+  { day: "Mon", votes: 420 },
+  { day: "Tue", votes: 980 },
+  { day: "Wed", votes: 1420 },
+  { day: "Thu", votes: 1180 },
+  { day: "Fri", votes: 1640 },
+  { day: "Sat", votes: 1320 },
+  { day: "Sun", votes: 1461 },
+];
 
-// Mutable exported states (always start empty — localStorage persistence removed)
-export const positions: Position[] = [];
-export const elections: Election[] = [];
-export const candidates: Candidate[] = [];
-export const voters: Voter[] = [];
-export const notifications: AppNotification[] = [];
+export const electionStatusBreakdown = [
+  { name: "Open", value: 1, color: "var(--color-success)" },
+  { name: "Scheduled", value: 1, color: "var(--color-brand)" },
+  { name: "Closed", value: 1, color: "var(--color-danger)" },
+];
+
+// Mutable exported states (loaded from localStorage with fallback defaults)
+export const positions: Position[] = getStorageItem("votesecure_positions", defaultPositions);
+export const elections: Election[] = getStorageItem("votesecure_elections", defaultElections);
+export const candidates: Candidate[] = getStorageItem("votesecure_candidates", defaultCandidates);
+export const voters: Voter[] = getStorageItem("votesecure_voters", defaultVoters);
+export const notifications: AppNotification[] = getStorageItem(
+  "votesecure_notifications",
+  defaultNotifications,
+);
 
 export const savePositions = () => setStorageItem("votesecure_positions", positions);
 export const saveElections = () => setStorageItem("votesecure_elections", elections);

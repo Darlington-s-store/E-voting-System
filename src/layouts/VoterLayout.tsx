@@ -149,10 +149,10 @@ export function VoterLayout() {
               to={l.to}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 group relative ${
                   isActive
-                    ? "bg-white/10 text-[#34D399] font-bold"
-                    : "text-emerald-200/70 hover:text-[#34D399] hover:bg-white/5"
+                    ? "bg-white/10 text-white font-extrabold"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 }`
               }
             >
@@ -160,7 +160,7 @@ export function VoterLayout() {
                 <>
                   <l.icon
                     className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                      isActive ? "text-[#34D399]" : "text-emerald-200/50 group-hover:text-[#34D399]"
+                      isActive ? "text-white" : "text-white/60 group-hover:text-white"
                     }`}
                   />
                   {!collapsed && <span className="truncate flex-1">{l.label}</span>}
@@ -174,7 +174,7 @@ export function VoterLayout() {
 
                   {/* Tooltip & Badge in collapsed state */}
                   {collapsed && (
-                    <div className="absolute left-14 bg-[#022C22] border border-emerald-800/50 text-[#34D399] px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-soft opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all z-50 pointer-events-none whitespace-nowrap">
+                    <div className="absolute left-14 bg-[#022C22] border border-emerald-800/50 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-soft opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100 transition-all z-50 pointer-events-none whitespace-nowrap">
                       {l.label}
                       {l.badge && (
                         <span

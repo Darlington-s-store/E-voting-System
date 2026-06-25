@@ -77,7 +77,7 @@
   --popover-foreground: oklch(0.18 0.02 162);
 
   /* Deep Forest Green instead of Navy */
-  --navy: oklch(0.20 0.04 162);
+  --navy: oklch(0.2 0.04 162);
   --navy-foreground: oklch(0.985 0.005 162);
 
   /* Emerald Green instead of Accent Blue */
