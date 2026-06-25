@@ -96,9 +96,7 @@ export default function Login() {
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-xs text-danger">{errors.password.message}</p>
-              )}
+              {errors.password && <p className="text-xs text-danger">{errors.password.message}</p>}
               <div className="flex justify-end">
                 <Link to="/forgot-password" className="text-xs text-brand hover:underline">
                   Forgot password?
