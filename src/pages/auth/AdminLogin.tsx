@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 import { AuthShell } from "@/components/shared/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,9 +10,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/lib/auth-store";
 import { toast } from "sonner";
 
-type FormData = { indexNumber: string; password: string; remember: boolean };
+type FormData = { adminUser: string; password: string; remember: boolean };
 
-export default function Login() {
+export default function AdminLogin() {
   const {
     register,
     handleSubmit,
@@ -27,71 +27,72 @@ export default function Login() {
   const onSubmit = (data: FormData) => {
     setLoading(true);
     setTimeout(() => {
-      const isAdmin = data.indexNumber.toLowerCase().includes("admin");
-      const role = isAdmin ? "admin" : "voter";
+      // Allow user if it contains "admin" (either username or email)
+      const isAdmin = data.adminUser.toLowerCase().includes("admin");
+
+      if (!isAdmin) {
+        toast.error("Invalid administrator credentials. Access denied.");
+        setAttempts((n) => n + 1);
+        setLoading(false);
+        return;
+      }
+
       login({
-        id: "u-" + Date.now(),
-        name: data.indexNumber,
-        email: data.indexNumber + "@student.edu",
-        role,
-        token: "sess-" + Date.now(),
-        studentId: data.indexNumber,
-        department: "",
-        faculty: "",
-        level: "",
-        phone: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.indexNumber)}&background=022C22&color=fff&bold=true`,
+        id: "admin-" + Date.now(),
+        name: data.adminUser,
+        email: data.adminUser + "@votesecure.admin",
+        role: "admin",
+        token: "admin-sess-" + Date.now(),
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.adminUser)}&background=022C22&color=34D399&bold=true`,
         twoFAEnabled: false,
       });
-      toast.success("Signed in successfully");
-      nav(isAdmin ? "/admin/dashboard" : "/voter/dashboard", { replace: true });
+
+      toast.success("Administrator session initialized");
+      nav("/admin/dashboard", { replace: true });
       setLoading(false);
-    }, 600);
+    }, 800);
   };
 
   const onError = () => setAttempts((n) => n + 1);
 
   return (
     <AuthShell
-      title="Welcome Back"
-      subtitle="Sign in to your E-voting System account"
+      title="Admin Portal"
+      subtitle="Sign in to E-voting System command center"
       footer={
-        <div className="space-y-3">
-          <div>
-            Don't have an account?{" "}
-            <Link to="/register" className="text-brand font-semibold hover:underline">
-              Create one
-            </Link>
-          </div>
-          <div className="pt-2.5 border-t border-border/60">
-            Are you an Administrator?{" "}
-            <Link to="/admin/login" className="text-brand font-bold hover:underline">
-              Access Admin Portal
-            </Link>
-          </div>
-        </div>
+        <>
+          Are you a Student?{" "}
+          <Link to="/login" className="text-brand font-semibold hover:underline">
+            Go to Student Portal
+          </Link>
+        </>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-5">
+        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-brand/10 border border-brand/20 text-brand text-xs font-semibold leading-relaxed">
+          <ShieldCheck className="w-4 h-4 shrink-0 text-brand" />
+          <span>Authorized Personnel Only. All session activities are monitored and logged.</span>
+        </div>
+
         {attempts >= 3 && (
           <div className="flex items-start gap-2 p-3 rounded-md bg-danger/10 text-danger text-sm">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-            <div>Too many attempts. Try again in 5 minutes.</div>
+            <div>Security alert: too many failed login attempts.</div>
           </div>
         )}
+
         <div className="space-y-2">
           <Label>
-            Index Number <span className="text-danger">*</span>
+            Administrator ID / Email <span className="text-danger">*</span>
           </Label>
           <Input
             type="text"
-            placeholder="e.g. SC/2022/01034"
-            {...register("indexNumber", { required: "Index number is required" })}
+            placeholder="e.g. admin or admin@votesecure.com"
+            {...register("adminUser", { required: "Administrator ID is required" })}
           />
-          {errors.indexNumber && (
-            <p className="text-xs text-danger">{errors.indexNumber.message}</p>
-          )}
+          {errors.adminUser && <p className="text-xs text-danger">{errors.adminUser.message}</p>}
         </div>
+
         <div className="space-y-2">
           <Label>
             Password <span className="text-danger">*</span>
@@ -112,20 +113,19 @@ export default function Login() {
           </div>
           {errors.password && <p className="text-xs text-danger">{errors.password.message}</p>}
         </div>
+
         <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Checkbox {...register("remember")} /> Remember me
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <Checkbox {...register("remember")} /> Keep session active
           </label>
-          <Link to="/forgot-password" className="text-brand hover:underline">
-            Forgot password?
-          </Link>
         </div>
+
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-11 bg-brand text-white hover:bg-brand/90"
+          className="w-full h-11 bg-brand text-white hover:bg-brand/90 font-bold transition shadow-sm"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Authenticate Session"}
         </Button>
       </form>
     </AuthShell>

@@ -16,6 +16,7 @@ import Help from "@/pages/public/Help";
 
 // Auth
 import Login from "@/pages/auth/Login";
+import AdminLogin from "@/pages/auth/AdminLogin";
 import Register from "@/pages/auth/Register";
 import VerifyEmail from "@/pages/auth/VerifyEmail";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
@@ -62,6 +63,7 @@ export default function App() {
         </Route>
 
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
