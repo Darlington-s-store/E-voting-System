@@ -19,6 +19,7 @@ import {
   savePositions,
   saveElections,
   elections,
+  voters,
 } from "@/lib/mock-data";
 import {
   Dialog,
@@ -484,6 +485,22 @@ export default function CreateElection() {
           ) : (
             <Button
               onClick={() => {
+                // Dynamically calculate matching active voters
+                const matchingVoters = voters.filter((v) => {
+                  if (v.status !== "active") return false;
+                  if (
+                    form.eligibility.faculty !== "all" &&
+                    v.faculty.toLowerCase().trim() !== form.eligibility.faculty.toLowerCase().trim()
+                  ) {
+                    return false;
+                  }
+                  if (form.eligibility.level !== "all" && v.level !== form.eligibility.level) {
+                    return false;
+                  }
+                  return true;
+                });
+                const computedEligibleCount = matchingVoters.length;
+
                 const newElection = {
                   id: `e-new-${Date.now()}`,
                   name: form.name || "Untitled Election",
@@ -497,12 +514,14 @@ export default function CreateElection() {
                     ? new Date(form.endDate).toISOString()
                     : new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
                   positionIds: form.positions,
-                  totalEligible: form.type === "Campus Awards" ? 12480 : 5000,
+                  totalEligible: computedEligibleCount,
                   votesCast: 0,
                 };
                 elections.push(newElection);
                 saveElections();
-                toast.success("Election created successfully!");
+                toast.success(
+                  `Election created successfully! (${computedEligibleCount} eligible voters calculated)`,
+                );
                 nav("/admin/elections");
               }}
               className="bg-success text-white"

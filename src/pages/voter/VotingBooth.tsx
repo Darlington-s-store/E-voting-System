@@ -70,7 +70,9 @@ export default function VotingBooth() {
 
   const candidates = useMemo(() => {
     if (!currentPosition || !election) return [];
-    return getCandidatesForPosition(election.id, currentPosition.id);
+    return getCandidatesForPosition(election.id, currentPosition.id).filter(
+      (c) => c.status === "active",
+    );
   }, [currentPosition, election]);
 
   const selectedCandidateId = currentPosition ? selections[currentPosition.id] : undefined;

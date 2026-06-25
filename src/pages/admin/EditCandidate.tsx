@@ -54,7 +54,9 @@ export default function EditCandidate() {
   const [funFact, setFunFact] = useState(candidate?.funFact || "");
   const [instagram, setInstagram] = useState(candidate?.instagram || "");
   const [twitter, setTwitter] = useState(candidate?.twitter || "");
-  const [status, setStatus] = useState<"active" | "inactive">(candidate?.status || "active");
+  const [status, setStatus] = useState<"active" | "inactive" | "pending">(
+    candidate?.status ?? "active",
+  );
 
   // Media states
   const [photoUrl, setPhotoUrl] = useState(candidate?.photo || "");

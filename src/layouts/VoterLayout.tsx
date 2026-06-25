@@ -14,6 +14,7 @@ import {
   Sun,
   Moon,
   ChevronDown,
+  UserPlus,
 } from "lucide-react";
 import { useAuth, useTheme } from "@/lib/auth-store";
 import { Logo } from "@/components/shared/Logo";
@@ -69,6 +70,7 @@ export function VoterLayout() {
       badgeColor: "bg-[#F4C430] text-black font-extrabold",
     },
     { to: "/voter/history", label: "Voting History", icon: History },
+    { to: "/voter/apply", label: "Register Candidacy", icon: UserPlus },
     {
       to: "/voter/notifications",
       label: "Notifications",

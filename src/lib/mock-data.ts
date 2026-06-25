@@ -44,7 +44,7 @@ export interface Candidate {
   funFact?: string;
   instagram?: string;
   twitter?: string;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "pending";
 }
 
 export interface Election {

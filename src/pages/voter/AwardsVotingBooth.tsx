@@ -52,7 +52,9 @@ export default function AwardsVotingBooth() {
   if (!election) return null;
 
   const currentCategory = categories[categoryIdx];
-  const nominees = currentCategory ? getCandidatesForPosition(election.id, currentCategory.id) : [];
+  const nominees = currentCategory
+    ? getCandidatesForPosition(election.id, currentCategory.id).filter((c) => c.status === "active")
+    : [];
   const selectedNomineeId = currentCategory ? selections[currentCategory.id] : undefined;
 
   const submitVotes = () => {

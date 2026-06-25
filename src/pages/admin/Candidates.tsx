@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PlusCircle, Trash2, Edit2, Star, Award, User, Search } from "lucide-react";
+import { PlusCircle, Trash2, Edit2, Star, Award, User, Search, Check } from "lucide-react";
 import {
   candidates as mockCandidates,
   positions,
@@ -25,7 +25,7 @@ import { toast } from "sonner";
 export default function Candidates() {
   const [items, setItems] = useState<Candidate[]>(() => mockCandidates);
   const [toDelete, setToDelete] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"all" | "election" | "awards">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "election" | "awards" | "pending">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
@@ -41,13 +41,35 @@ export default function Candidates() {
     setToDelete(null);
   };
 
+  const handleApprove = (id: string) => {
+    const updated = items.map((c) => {
+      if (c.id === id) {
+        const updatedCandidate = { ...c, status: "active" as const };
+        const idx = mockCandidates.findIndex((mc) => mc.id === id);
+        if (idx !== -1) {
+          mockCandidates[idx] = updatedCandidate;
+        }
+        return updatedCandidate;
+      }
+      return c;
+    });
+    setItems(updated);
+    saveCandidates();
+    toast.success("Candidate candidacy approved successfully!");
+  };
+
   // Filter candidates based on tab, search, and position
   const filteredCandidates = items.filter((c) => {
     const isAwards = c.electionId === "e-awards";
 
     // Tab filter
-    if (activeTab === "election" && isAwards) return false;
-    if (activeTab === "awards" && !isAwards) return false;
+    if (activeTab === "pending") {
+      if (c.status !== "pending") return false;
+    } else {
+      if (c.status === "pending") return false;
+      if (activeTab === "election" && isAwards) return false;
+      if (activeTab === "awards" && !isAwards) return false;
+    }
 
     // Search query filter
     if (searchQuery) {
@@ -76,6 +98,8 @@ export default function Candidates() {
     return elections.find((e) => e.id === electionId)?.name || "Unknown Event";
   };
 
+  const pendingCount = items.filter((c) => c.status === "pending").length;
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -95,9 +119,9 @@ export default function Candidates() {
       </div>
 
       {/* Filters and Search */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-soft">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-soft">
         {/* Tabs */}
-        <div className="flex bg-muted p-1 rounded-lg border border-border">
+        <div className="flex flex-wrap bg-muted p-1 rounded-lg border border-border gap-1">
           <button
             onClick={() => setActiveTab("all")}
             className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
@@ -106,7 +130,7 @@ export default function Candidates() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            All ({items.length})
+            All ({items.filter((c) => c.status !== "pending").length})
           </button>
           <button
             onClick={() => setActiveTab("election")}
@@ -117,7 +141,8 @@ export default function Candidates() {
             }`}
           >
             <Award className="w-3.5 h-3.5" />
-            Elections ({items.filter((c) => c.electionId !== "e-awards").length})
+            Elections (
+            {items.filter((c) => c.electionId !== "e-awards" && c.status !== "pending").length})
           </button>
           <button
             onClick={() => setActiveTab("awards")}
@@ -128,12 +153,26 @@ export default function Candidates() {
             }`}
           >
             <Star className="w-3.5 h-3.5 fill-current" />
-            Campus Awards ({items.filter((c) => c.electionId === "e-awards").length})
+            Campus Awards (
+            {items.filter((c) => c.electionId === "e-awards" && c.status !== "pending").length})
+          </button>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all relative ${
+              activeTab === "pending"
+                ? "bg-amber-500 text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Pending Approvals ({pendingCount})
+            {pendingCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-orange-500 animate-ping" />
+            )}
           </button>
         </div>
 
         {/* Search Input */}
-        <div className="relative w-full md:w-72">
+        <div className="relative w-full lg:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             value={searchQuery}
@@ -201,8 +240,10 @@ export default function Candidates() {
                           <span
                             className={`absolute bottom-0 right-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                               c.status === "active"
-                                ? "bg-success/10 text-success border-success/30"
-                                : "bg-muted text-muted-foreground border-border"
+                                ? "bg-[#F0FDF4] text-[#059669] border-[#059669]/30"
+                                : c.status === "pending"
+                                  ? "bg-amber-100 text-amber-800 border-amber-300"
+                                  : "bg-muted text-muted-foreground border-border"
                             }`}
                           >
                             {c.status}
@@ -234,23 +275,34 @@ export default function Candidates() {
                         )}
 
                         {/* Action buttons */}
-                        <div className="mt-5 pt-4 border-t border-border/60 w-full flex gap-2 justify-center">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs font-semibold border-border/80 hover:bg-muted/10 shrink-0"
-                            onClick={() => navigate(`/admin/candidates/${c.id}/edit`)}
-                          >
-                            <Edit2 className="w-3 h-3 mr-1" /> Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 text-xs font-semibold text-danger hover:bg-danger/5 shrink-0"
-                            onClick={() => setToDelete(c.id)}
-                          >
-                            <Trash2 className="w-3 h-3 mr-1" /> Delete
-                          </Button>
+                        <div className="mt-5 pt-4 border-t border-border/60 w-full flex flex-col gap-2">
+                          {c.status === "pending" && (
+                            <Button
+                              size="sm"
+                              className="w-full h-8 text-xs font-extrabold bg-[#059669] hover:bg-[#047857] text-white shadow-sm"
+                              onClick={() => handleApprove(c.id)}
+                            >
+                              <Check className="w-3 h-3 mr-1" /> Approve Candidacy
+                            </Button>
+                          )}
+                          <div className="flex gap-2 justify-center w-full">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 h-8 text-xs font-semibold border-border/80 hover:bg-muted/10 shrink-0"
+                              onClick={() => navigate(`/admin/candidates/${c.id}/edit`)}
+                            >
+                              <Edit2 className="w-3 h-3 mr-1" /> Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="flex-1 h-8 text-xs font-semibold text-danger hover:bg-danger/5 shrink-0"
+                              onClick={() => setToDelete(c.id)}
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" /> Delete
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     );

@@ -22,6 +22,7 @@ import VoterElectionDetail from "@/pages/voter/ElectionDetail";
 import VotingBooth from "@/pages/voter/VotingBooth";
 import AwardsVotingBooth from "@/pages/voter/AwardsVotingBooth";
 import VoterHistory from "@/pages/voter/History";
+import VoterApplyCandidacy from "@/pages/voter/ApplyCandidacy";
 import VoterNotifications from "@/pages/voter/Notifications";
 import VoterProfile from "@/pages/voter/Profile";
 
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/voter/elections/:id/vote" element={<VotingBooth />} />
             <Route path="/voter/awards/:id/vote" element={<AwardsVotingBooth />} />
             <Route path="/voter/history" element={<VoterHistory />} />
+            <Route path="/voter/apply" element={<VoterApplyCandidacy />} />
             <Route path="/voter/notifications" element={<VoterNotifications />} />
             <Route path="/voter/profile" element={<VoterProfile />} />
           </Route>
