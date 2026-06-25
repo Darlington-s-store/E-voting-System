@@ -18,7 +18,7 @@ export default function Contact() {
     }, 900);
   };
   const info = [
-    { icon: Mail, title: "Email", value: "support@securevote.pro" },
+    { icon: Mail, title: "Email", value: "support@evoting.system" },
     { icon: Phone, title: "Phone", value: "+233 (0) 20 000 0000" },
     { icon: MapPin, title: "Office", value: "Accra, Ghana" },
   ];
@@ -26,35 +26,61 @@ export default function Contact() {
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-extrabold">Get in touch</h1>
-        <p className="mt-3 text-muted-foreground">We'd love to hear from you. Send us a message and we'll respond shortly.</p>
+        <p className="mt-3 text-muted-foreground">
+          We'd love to hear from you. Send us a message and we'll respond shortly.
+        </p>
       </div>
       <div className="mt-12 grid lg:grid-cols-2 gap-8">
-        <form onSubmit={onSubmit} className="p-8 rounded-xl bg-card border border-border shadow-soft space-y-4">
+        <form
+          onSubmit={onSubmit}
+          className="p-8 rounded-xl bg-card border border-border shadow-soft space-y-4"
+        >
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Name <span className="text-danger">*</span></Label>
+              <Label>
+                Name <span className="text-danger">*</span>
+              </Label>
               <Input required placeholder="Your name" />
             </div>
             <div className="space-y-2">
-              <Label>Email <span className="text-danger">*</span></Label>
+              <Label>
+                Email <span className="text-danger">*</span>
+              </Label>
               <Input type="email" required placeholder="you@institution.edu" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Subject <span className="text-danger">*</span></Label>
+            <Label>
+              Subject <span className="text-danger">*</span>
+            </Label>
             <Input required placeholder="How can we help?" />
           </div>
           <div className="space-y-2">
-            <Label>Message <span className="text-danger">*</span></Label>
+            <Label>
+              Message <span className="text-danger">*</span>
+            </Label>
             <Textarea required rows={6} placeholder="Tell us about your election needs..." />
           </div>
-          <Button type="submit" disabled={loading} className="w-full bg-brand text-white hover:bg-brand/90">
-            {loading ? "Sending..." : <>Send Message <Send className="ml-2 w-4 h-4" /></>}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-brand text-white hover:bg-brand/90"
+          >
+            {loading ? (
+              "Sending..."
+            ) : (
+              <>
+                Send Message <Send className="ml-2 w-4 h-4" />
+              </>
+            )}
           </Button>
         </form>
         <div className="space-y-4">
           {info.map((c) => (
-            <div key={c.title} className="p-6 rounded-xl bg-card border border-border shadow-soft flex items-start gap-4">
+            <div
+              key={c.title}
+              className="p-6 rounded-xl bg-card border border-border shadow-soft flex items-start gap-4"
+            >
               <div className="w-12 h-12 rounded-lg bg-brand/10 text-brand flex items-center justify-center">
                 <c.icon className="w-5 h-5" />
               </div>

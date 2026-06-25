@@ -23,7 +23,10 @@ export default function VerifyEmail() {
     setCode(next);
     if (c && i < 5) refs.current[i + 1]?.focus();
     if (next.every((d) => d)) {
-      setTimeout(() => { toast.success("Email verified!"); nav("/login"); }, 400);
+      setTimeout(() => {
+        toast.success("Email verified!");
+        nav("/login");
+      }, 400);
     }
   };
 
@@ -36,7 +39,9 @@ export default function VerifyEmail() {
         {code.map((d, i) => (
           <input
             key={i}
-            ref={(el) => { refs.current[i] = el; }}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
             value={d}
             onChange={(e) => handle(i, e.target.value)}
             onKeyDown={(e) => e.key === "Backspace" && !d && i > 0 && refs.current[i - 1]?.focus()}
@@ -47,9 +52,26 @@ export default function VerifyEmail() {
         ))}
       </div>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        {seconds > 0 ? <>Resend code in <span className="font-mono font-semibold">{mm}:{ss}</span></> : "Didn't receive it?"}
+        {seconds > 0 ? (
+          <>
+            Resend code in{" "}
+            <span className="font-mono font-semibold">
+              {mm}:{ss}
+            </span>
+          </>
+        ) : (
+          "Didn't receive it?"
+        )}
       </p>
-      <Button disabled={seconds > 0} onClick={() => { setSeconds(105); toast.info("New code sent"); }} className="mt-4 w-full" variant="outline">
+      <Button
+        disabled={seconds > 0}
+        onClick={() => {
+          setSeconds(105);
+          toast.info("New code sent");
+        }}
+        className="mt-4 w-full"
+        variant="outline"
+      >
         Resend Code
       </Button>
     </AuthShell>

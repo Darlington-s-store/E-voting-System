@@ -22,7 +22,8 @@ export function Countdown({ target, compact = false }: { target: string; compact
   if (compact) {
     return (
       <span className="font-mono text-sm font-semibold text-foreground">
-        {d}d {String(h).padStart(2, "0")}h {String(m).padStart(2, "0")}m {String(s).padStart(2, "0")}s
+        {d}d {String(h).padStart(2, "0")}h {String(m).padStart(2, "0")}m{" "}
+        {String(s).padStart(2, "0")}s
       </span>
     );
   }

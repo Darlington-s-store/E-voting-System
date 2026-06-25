@@ -8,6 +8,8 @@ const map: Record<string, { bg: string; text: string; label: string }> = {
   archived: { bg: "bg-warning/15", text: "text-warning", label: "Archived" },
   active: { bg: "bg-success/15", text: "text-success", label: "Active" },
   suspended: { bg: "bg-danger/15", text: "text-danger", label: "Suspended" },
+  voted: { bg: "bg-success/15", text: "text-success", label: "Voted" },
+  submitted: { bg: "bg-success/15", text: "text-success", label: "Submitted" },
 };
 
 export function StatusBadge({ status }: { status: ElectionStatus | string }) {

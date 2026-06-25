@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
+
 import { SiteLayout } from "@/layouts/SiteLayout";
+
 import { VoterLayout } from "@/layouts/VoterLayout";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
@@ -23,7 +25,9 @@ import TwoFactor from "@/pages/auth/TwoFactor";
 // Voter
 import VoterDashboard from "@/pages/voter/Dashboard";
 import VoterElections from "@/pages/voter/Elections";
+import VoterElectionDetail from "@/pages/voter/ElectionDetail";
 import VotingBooth from "@/pages/voter/VotingBooth";
+import AwardsVotingBooth from "@/pages/voter/AwardsVotingBooth";
 import VoterHistory from "@/pages/voter/History";
 import VoterNotifications from "@/pages/voter/Notifications";
 import VoterProfile from "@/pages/voter/Profile";
@@ -36,6 +40,8 @@ import AdminElectionDetail from "@/pages/admin/ElectionDetail";
 import AdminResults from "@/pages/admin/Results";
 import AdminVoters from "@/pages/admin/Voters";
 import AdminCandidates from "@/pages/admin/Candidates";
+import AdminCreateCandidate from "@/pages/admin/CreateCandidate";
+import AdminEditCandidate from "@/pages/admin/EditCandidate";
 import AdminPositions from "@/pages/admin/Positions";
 import AdminReports from "@/pages/admin/Reports";
 import AdminAuditLogs from "@/pages/admin/AuditLogs";
@@ -67,7 +73,9 @@ export default function App() {
             <Route path="/voter" element={<Navigate to="/voter/dashboard" replace />} />
             <Route path="/voter/dashboard" element={<VoterDashboard />} />
             <Route path="/voter/elections" element={<VoterElections />} />
+            <Route path="/voter/elections/:id" element={<VoterElectionDetail />} />
             <Route path="/voter/elections/:id/vote" element={<VotingBooth />} />
+            <Route path="/voter/awards/:id/vote" element={<AwardsVotingBooth />} />
             <Route path="/voter/history" element={<VoterHistory />} />
             <Route path="/voter/notifications" element={<VoterNotifications />} />
             <Route path="/voter/profile" element={<VoterProfile />} />
@@ -84,6 +92,8 @@ export default function App() {
             <Route path="/admin/elections/:id/results" element={<AdminResults />} />
             <Route path="/admin/voters" element={<AdminVoters />} />
             <Route path="/admin/candidates" element={<AdminCandidates />} />
+            <Route path="/admin/candidates/create" element={<AdminCreateCandidate />} />
+            <Route path="/admin/candidates/:id/edit" element={<AdminEditCandidate />} />
             <Route path="/admin/positions" element={<AdminPositions />} />
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />

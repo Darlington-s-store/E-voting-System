@@ -1,6 +1,14 @@
 import { Link, useParams } from "react-router-dom";
 import { format } from "date-fns";
-import { ChevronLeft, PlayCircle, StopCircle, Send, BarChart3, Users, Briefcase } from "lucide-react";
+import {
+  ChevronLeft,
+  PlayCircle,
+  StopCircle,
+  Send,
+  BarChart3,
+  Users,
+  Briefcase,
+} from "lucide-react";
 import { getElection, getPositionsForElection } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -15,7 +23,10 @@ export default function ElectionDetail() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <Link to="/admin/elections" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+      <Link
+        to="/admin/elections"
+        className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+      >
         <ChevronLeft className="w-4 h-4" /> Back to elections
       </Link>
 
@@ -28,10 +39,35 @@ export default function ElectionDetail() {
           <p className="text-muted-foreground mt-1">{e.description}</p>
         </div>
         <div className="flex gap-2">
-          {e.status === "draft" && <Button className="bg-success text-white" onClick={() => toast.success("Election opened")}><PlayCircle className="w-4 h-4 mr-2" /> Open Election</Button>}
-          {e.status === "open" && <Button className="bg-warning text-white" onClick={() => toast.success("Election closed")}><StopCircle className="w-4 h-4 mr-2" /> Close Election</Button>}
-          {e.status === "closed" && <Button className="bg-brand text-white" onClick={() => toast.success("Results published")}><Send className="w-4 h-4 mr-2" /> Publish Results</Button>}
-          <Link to={`/admin/elections/${e.id}/results`}><Button variant="outline"><BarChart3 className="w-4 h-4 mr-2" /> View Results</Button></Link>
+          {e.status === "draft" && (
+            <Button
+              className="bg-success text-white"
+              onClick={() => toast.success("Election opened")}
+            >
+              <PlayCircle className="w-4 h-4 mr-2" /> Open Election
+            </Button>
+          )}
+          {e.status === "open" && (
+            <Button
+              className="bg-warning text-white"
+              onClick={() => toast.success("Election closed")}
+            >
+              <StopCircle className="w-4 h-4 mr-2" /> Close Election
+            </Button>
+          )}
+          {e.status === "closed" && (
+            <Button
+              className="bg-brand text-white"
+              onClick={() => toast.success("Results published")}
+            >
+              <Send className="w-4 h-4 mr-2" /> Publish Results
+            </Button>
+          )}
+          <Link to={`/admin/elections/${e.id}/results`}>
+            <Button variant="outline">
+              <BarChart3 className="w-4 h-4 mr-2" /> View Results
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -45,8 +81,14 @@ export default function ElectionDetail() {
       <div className="rounded-xl bg-card border border-border p-6 shadow-soft">
         <h2 className="font-bold mb-4">Schedule</h2>
         <div className="grid sm:grid-cols-2 gap-4 text-sm">
-          <div><span className="text-muted-foreground">Starts: </span><span className="font-semibold">{format(new Date(e.startDate), "PPp")}</span></div>
-          <div><span className="text-muted-foreground">Ends: </span><span className="font-semibold">{format(new Date(e.endDate), "PPp")}</span></div>
+          <div>
+            <span className="text-muted-foreground">Starts: </span>
+            <span className="font-semibold">{format(new Date(e.startDate), "PPp")}</span>
+          </div>
+          <div>
+            <span className="text-muted-foreground">Ends: </span>
+            <span className="font-semibold">{format(new Date(e.endDate), "PPp")}</span>
+          </div>
         </div>
       </div>
 

@@ -31,8 +31,7 @@ export const useAuth = create<AuthState>()(
       user: null,
       login: (u) => set({ user: u }),
       logout: () => set({ user: null }),
-      update: (patch) =>
-        set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
+      update: (patch) => set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
     }),
     { name: "securevote-auth" },
   ),

@@ -44,15 +44,24 @@ export default function ResetPassword() {
                   <div key={i} className={`flex-1 ${i < s.score ? s.color : "bg-muted"}`} />
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">Strength: <span className="font-semibold">{s.label}</span></p>
+              <p className="text-xs text-muted-foreground">
+                Strength: <span className="font-semibold">{s.label}</span>
+              </p>
             </div>
           )}
         </div>
         <div className="space-y-2">
           <Label>Confirm password</Label>
-          <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+          <Input
+            type="password"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            required
+          />
         </div>
-        <Button className="w-full h-11 bg-brand text-white hover:bg-brand/90">Reset Password</Button>
+        <Button className="w-full h-11 bg-brand text-white hover:bg-brand/90">
+          Reset Password
+        </Button>
       </form>
     </AuthShell>
   );
