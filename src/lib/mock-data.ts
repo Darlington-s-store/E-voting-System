@@ -482,22 +482,7 @@ const defaultVoters: Voter[] = Array.from({ length: 120 }, (_, i) => {
   };
 });
 
-export const auditLogs: AuditLog[] = Array.from({ length: 40 }, (_, i) => {
-  const actions: AuditLog["action"][] = ["LOGIN", "VOTE", "CREATE", "UPDATE", "DELETE"];
-  const action = actions[i % actions.length];
-  const fallbackVoterName =
-    firstNames[i % firstNames.length] + " " + lastNames[(i * 2) % lastNames.length];
-  return {
-    id: `log-${i}`,
-    timestamp: new Date(Date.now() - i * 13 * 60000).toISOString(),
-    user: fallbackVoterName,
-    role: i % 6 === 0 ? "admin" : "voter",
-    action,
-    entity: action === "VOTE" ? "Election e1" : action === "LOGIN" ? "Auth" : "Position p3",
-    ip: `196.${i % 255}.${(i * 3) % 255}.${(i * 7) % 255}`,
-    details: `${action} performed successfully`,
-  };
-});
+export const auditLogs: AuditLog[] = [];
 
 const defaultNotifications: AppNotification[] = [
   {
@@ -558,21 +543,34 @@ export const electionStatusBreakdown = [
   { name: "Closed", value: 1, color: "var(--color-danger)" },
 ];
 
-// Mutable exported states (loaded from localStorage with fallback defaults)
-export const positions: Position[] = getStorageItem("votesecure_positions", defaultPositions);
-export const elections: Election[] = getStorageItem("votesecure_elections", defaultElections);
-export const candidates: Candidate[] = getStorageItem("votesecure_candidates", defaultCandidates);
-export const voters: Voter[] = getStorageItem("votesecure_voters", defaultVoters);
-export const notifications: AppNotification[] = getStorageItem(
-  "votesecure_notifications",
-  defaultNotifications,
+// Mutable exported states (loaded from localStorage with empty fallback).
+// Storage keys bumped to v2 to clear any previously seeded demo data.
+export const positions: Position[] = getStorageItem<Position[]>("votesecure_positions_v2", []);
+export const elections: Election[] = getStorageItem<Election[]>("votesecure_elections_v2", []);
+export const candidates: Candidate[] = getStorageItem<Candidate[]>("votesecure_candidates_v2", []);
+export const voters: Voter[] = getStorageItem<Voter[]>("votesecure_voters_v2", []);
+export const notifications: AppNotification[] = getStorageItem<AppNotification[]>(
+  "votesecure_notifications_v2",
+  [],
 );
 
-export const savePositions = () => setStorageItem("votesecure_positions", positions);
-export const saveElections = () => setStorageItem("votesecure_elections", elections);
-export const saveCandidates = () => setStorageItem("votesecure_candidates", candidates);
-export const saveVoters = () => setStorageItem("votesecure_voters", voters);
-export const saveNotifications = () => setStorageItem("votesecure_notifications", notifications);
+export const savePositions = () => setStorageItem("votesecure_positions_v2", positions);
+export const saveElections = () => setStorageItem("votesecure_elections_v2", elections);
+export const saveCandidates = () => setStorageItem("votesecure_candidates_v2", candidates);
+export const saveVoters = () => setStorageItem("votesecure_voters_v2", voters);
+export const saveNotifications = () => setStorageItem("votesecure_notifications_v2", notifications);
+
+// Clean up any legacy seeded data from earlier versions on first load.
+if (isBrowser) {
+  [
+    "votesecure_positions",
+    "votesecure_elections",
+    "votesecure_candidates",
+    "votesecure_voters",
+    "votesecure_notifications",
+    "votesecure_voted_elections",
+  ].forEach((k) => localStorage.removeItem(k));
+}
 
 export function getElection(id: string) {
   return elections.find((e) => e.id === id);
