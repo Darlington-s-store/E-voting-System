@@ -1,18 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 
-import { SiteLayout } from "@/layouts/SiteLayout";
-
 import { VoterLayout } from "@/layouts/VoterLayout";
 import { AdminLayout } from "@/layouts/AdminLayout";
 import { ProtectedRoute } from "@/components/shared/ProtectedRoute";
-
-// Public
-import Home from "@/pages/public/Home";
-import About from "@/pages/public/About";
-import Features from "@/pages/public/Features";
-import Contact from "@/pages/public/Contact";
-import Help from "@/pages/public/Help";
+import { useAuth } from "@/lib/auth-store";
 
 // Auth
 import Login from "@/pages/auth/Login";
@@ -50,17 +42,18 @@ import AdminSettings from "@/pages/admin/Settings";
 
 import NotFound from "@/pages/NotFound";
 
+function RootRedirect() {
+  const user = useAuth((s) => s.user);
+  if (user?.role === "admin") return <Navigate to="/admin/dashboard" replace />;
+  if (user?.role === "voter") return <Navigate to="/voter/dashboard" replace />;
+  return <Navigate to="/login" replace />;
+}
+
 export default function App() {
   return (
     <>
       <Routes>
-        <Route element={<SiteLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/help" element={<Help />} />
-        </Route>
+        <Route path="/" element={<RootRedirect />} />
 
         <Route path="/login" element={<Login />} />
         <Route path="/admin/login" element={<AdminLogin />} />
