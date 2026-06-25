@@ -68,29 +68,43 @@ export default function CreateCandidate() {
     setPositionId("");
   }, [electionId]);
 
+  const readAsDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   // Handle profile photo upload
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file (PNG/JPG/WEBP)");
       return;
     }
-    const preview = URL.createObjectURL(file);
-    setPhotoUrl(preview);
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      return;
+    }
+    setPhotoUrl(await readAsDataUrl(file));
     toast.success("Profile photo uploaded!");
   };
 
   // Handle poster upload
-  const handlePosterUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file (PNG/JPG/WEBP)");
       return;
     }
-    const preview = URL.createObjectURL(file);
-    setPosterUrl(preview);
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Poster must be less than 3MB");
+      return;
+    }
+    setPosterUrl(await readAsDataUrl(file));
     toast.success("Campaign poster uploaded!");
   };
 
