@@ -36,7 +36,7 @@ import {
 
 export default function Settings() {
   const { theme, toggle } = useTheme();
-  const [name, setName] = useState("University of Lagos");
+  const [name, setName] = useState("");
   const [confirmType, setConfirmType] = useState<
     "resetVotes" | "wipeData" | "restoreClean" | "restoreDemo" | null
   >(null);
@@ -100,11 +100,11 @@ export default function Settings() {
           </div>
           <div className="space-y-2">
             <Label>Contact email</Label>
-            <Input defaultValue="elections@unilag.edu.ng" />
+            <Input placeholder="elections@institution.edu" />
           </div>
           <div className="space-y-2">
             <Label>Timezone</Label>
-            <Input defaultValue="Africa/Lagos" />
+            <Input defaultValue="UTC" />
           </div>
           <Button onClick={() => toast.success("Saved")} className="bg-brand text-white">
             <Save className="w-4 h-4 mr-2" /> Save
