@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-store";
 import { toast } from "sonner";
 import { Logo } from "@/components/shared/Logo";
+import { voters } from "@/lib/mock-data";
 
 type FormData = { indexNumber: string; password: string };
 
@@ -25,20 +26,57 @@ export default function Login() {
   const onSubmit = (data: FormData) => {
     setLoading(true);
     setTimeout(() => {
-      login({
-        id: "u-" + Date.now(),
-        name: data.indexNumber,
-        email: data.indexNumber + "@student.edu",
-        role: "voter",
-        token: "sess-" + Date.now(),
-        studentId: data.indexNumber,
-        department: "",
-        faculty: "",
-        level: "",
-        phone: "",
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.indexNumber)}&background=1E3A5F&color=fff&bold=true`,
-        twoFAEnabled: false,
-      });
+      const input = data.indexNumber.trim().toLowerCase();
+      // Look up voter in the database (by student ID, email, or internal voter ID)
+      const voter = voters.find(
+        (v) =>
+          v.studentId.toLowerCase() === input ||
+          v.email.toLowerCase() === input ||
+          v.id.toLowerCase() === input,
+      );
+
+      if (voter) {
+        if (voter.status === "suspended") {
+          toast.error("Your voter account has been suspended. Please contact the administrator.");
+          setLoading(false);
+          return;
+        }
+
+        login({
+          id: voter.id,
+          name: voter.name,
+          email: voter.email,
+          role: "voter",
+          token: "sess-" + Date.now(),
+          studentId: voter.studentId,
+          department: voter.department,
+          faculty: voter.faculty,
+          level: voter.level,
+          phone: voter.phoneNumber || "",
+          avatar: voter.avatar,
+          twoFAEnabled: voter.twoFactorEnabled || false,
+        });
+      } else {
+        // Fallback for demo convenience: auto-create voter if not found
+        toast.info("ID not found in voter registry. Creating a guest voter profile...");
+        login({
+          id: "u-" + Date.now(),
+          name: data.indexNumber,
+          email: data.indexNumber + "@student.edu",
+          role: "voter",
+          token: "sess-" + Date.now(),
+          studentId: data.indexNumber,
+          department: "Computer Science",
+          faculty: "Science",
+          level: "300",
+          phone: "",
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            data.indexNumber,
+          )}&background=1E3A5F&color=fff&bold=true`,
+          twoFAEnabled: false,
+        });
+      }
+
       toast.success("Signed in successfully");
       nav("/voter/dashboard", { replace: true });
       setLoading(false);

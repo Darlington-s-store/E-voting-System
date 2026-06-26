@@ -63,6 +63,12 @@ export default function AdminElections() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | "draft" | "scheduled" | "open" | "closed">("all");
   const [confirmAction, setConfirmAction] = useState<{ type: string; id: string } | null>(null);
+  const [confirmText, setConfirmText] = useState("");
+
+  const openConfirmModal = (action: { type: string; id: string }) => {
+    setConfirmText("");
+    setConfirmAction(action);
+  };
 
   // Edit election states
   const [editOpen, setEditOpen] = useState(false);
@@ -147,6 +153,7 @@ export default function AdminElections() {
 
     setItems(updatedElections);
     setConfirmAction(null);
+    setConfirmText("");
   };
 
   return (
@@ -252,28 +259,28 @@ export default function AdminElections() {
                           </DropdownMenuItem>
                           {(e.status === "draft" || e.status === "scheduled") && (
                             <DropdownMenuItem
-                              onClick={() => setConfirmAction({ type: "open", id: e.id })}
+                              onClick={() => openConfirmModal({ type: "open", id: e.id })}
                             >
                               <PlayCircle className="w-4 h-4 mr-2 text-success" /> Open Election
                             </DropdownMenuItem>
                           )}
                           {e.status === "open" && (
                             <DropdownMenuItem
-                              onClick={() => setConfirmAction({ type: "close", id: e.id })}
+                              onClick={() => openConfirmModal({ type: "close", id: e.id })}
                             >
                               <StopCircle className="w-4 h-4 mr-2 text-warning" /> Close Election
                             </DropdownMenuItem>
                           )}
                           {e.status === "closed" && (
                             <DropdownMenuItem
-                              onClick={() => setConfirmAction({ type: "publish", id: e.id })}
+                              onClick={() => openConfirmModal({ type: "publish", id: e.id })}
                             >
                               <Send className="w-4 h-4 mr-2 text-brand" /> Publish Results
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem
                             className="text-danger"
-                            onClick={() => setConfirmAction({ type: "delete", id: e.id })}
+                            onClick={() => openConfirmModal({ type: "delete", id: e.id })}
                           >
                             <Trash2 className="w-4 h-4 mr-2" /> Delete
                           </DropdownMenuItem>
@@ -380,25 +387,109 @@ export default function AdminElections() {
 
       {/* Confirm Status Change Action Alert */}
       <AlertDialog open={!!confirmAction} onOpenChange={(v) => !v && setConfirmAction(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm {confirmAction?.type}</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to {confirmAction?.type} this election? This action will be
-              logged and can impact voter access.
-            </AlertDialogDescription>
+            {confirmAction?.type === "open" && (
+              <>
+                <AlertDialogTitle className="text-lg font-bold text-success flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5" /> Start Election Confirmation
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground space-y-3">
+                  <div>
+                    You are about to open voting. This will allow all eligible voters to cast votes
+                    immediately and make the voting booth live.
+                  </div>
+                  <div className="space-y-1.5 pt-2">
+                    <Label
+                      htmlFor="type-start-list"
+                      className="text-xs font-semibold text-foreground"
+                    >
+                      Type <span className="font-extrabold">"START"</span> to confirm:
+                    </Label>
+                    <Input
+                      id="type-start-list"
+                      value={confirmText}
+                      onChange={(e) => setConfirmText(e.target.value)}
+                      placeholder="START"
+                      className="h-10 text-sm font-bold uppercase tracking-wider"
+                    />
+                  </div>
+                </AlertDialogDescription>
+              </>
+            )}
+
+            {confirmAction?.type === "close" && (
+              <>
+                <AlertDialogTitle className="text-lg font-bold text-warning flex items-center gap-2">
+                  <StopCircle className="w-5 h-5" /> Close Election Confirmation
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground space-y-3">
+                  <div>
+                    You are about to CLOSE voting. Closing will immediately stop all vote
+                    submissions and lock counts permanently. This action cannot be undone.
+                  </div>
+                  <div className="space-y-1.5 pt-2">
+                    <Label
+                      htmlFor="type-close-list"
+                      className="text-xs font-semibold text-foreground"
+                    >
+                      Type <span className="font-extrabold">"CLOSE"</span> to confirm:
+                    </Label>
+                    <Input
+                      id="type-close-list"
+                      value={confirmText}
+                      onChange={(e) => setConfirmText(e.target.value)}
+                      placeholder="CLOSE"
+                      className="h-10 text-sm font-bold uppercase tracking-wider"
+                    />
+                  </div>
+                </AlertDialogDescription>
+              </>
+            )}
+
+            {confirmAction?.type === "publish" && (
+              <>
+                <AlertDialogTitle className="text-lg font-bold text-brand flex items-center gap-2">
+                  <Send className="w-5 h-5" /> Publish Election Results?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+                  Are you sure you want to publish the final results? They will become visible to
+                  all voters on their dashboard.
+                </AlertDialogDescription>
+              </>
+            )}
+
+            {confirmAction?.type === "delete" && (
+              <>
+                <AlertDialogTitle className="text-lg font-bold text-danger flex items-center gap-2">
+                  <Trash2 className="w-5 h-5" /> Delete Election?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground">
+                  Are you sure you want to delete this election? This action will permanently remove
+                  all candidates and votes associated with it. This action cannot be undone.
+                </AlertDialogDescription>
+              </>
+            )}
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAction}
-              className={
+              disabled={
+                (confirmAction?.type === "open" && confirmText !== "START") ||
+                (confirmAction?.type === "close" && confirmText !== "CLOSE")
+              }
+              className={`font-semibold shadow-sm ${
                 confirmAction?.type === "delete"
                   ? "bg-danger text-white hover:bg-danger/90"
-                  : "bg-brand text-white hover:bg-brand/90"
-              }
+                  : confirmAction?.type === "open"
+                    ? "bg-success text-white hover:bg-success/90"
+                    : confirmAction?.type === "close"
+                      ? "bg-warning text-white hover:bg-warning/90"
+                      : "bg-brand text-white hover:bg-brand/90"
+              }`}
             >
-              Confirm
+              Confirm Action
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
