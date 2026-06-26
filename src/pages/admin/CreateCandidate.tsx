@@ -13,7 +13,14 @@ import {
   User,
   Image as ImageIcon,
 } from "lucide-react";
-import { positions, elections, candidates, saveCandidates, type Candidate } from "@/lib/mock-data";
+import {
+  positions,
+  elections,
+  candidates,
+  saveCandidates,
+  partylists,
+  type Candidate,
+} from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,6 +50,7 @@ export default function CreateCandidate() {
   const [instagram, setInstagram] = useState("");
   const [twitter, setTwitter] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
+  const [partylistId, setPartylistId] = useState("");
 
   // Media states (storing URL preview strings)
   const [photoUrl, setPhotoUrl] = useState("");
@@ -170,6 +178,7 @@ export default function CreateCandidate() {
         instagram: instagram.trim() ? instagram.trim() : undefined,
         twitter: twitter.trim() ? twitter.trim() : undefined,
         status,
+        partylistId: partylistId === "independent" || !partylistId ? undefined : partylistId,
       };
 
       candidates.push(newCandidate);
@@ -362,8 +371,8 @@ export default function CreateCandidate() {
               />
             </div>
 
-            {/* Event & Position */}
-            <div className="grid sm:grid-cols-2 gap-4">
+            {/* Event, Position & Partylist */}
+            <div className="grid sm:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">
                   Election / Event <span className="text-danger">*</span>
@@ -396,6 +405,23 @@ export default function CreateCandidate() {
                     {filteredPositions.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Partylist Affiliation</Label>
+                <Select value={partylistId} onValueChange={setPartylistId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Independent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="independent">Independent (None)</SelectItem>
+                    {partylists.map((party) => (
+                      <SelectItem key={party.id} value={party.id}>
+                        {party.name} ({party.acronym})
                       </SelectItem>
                     ))}
                   </SelectContent>

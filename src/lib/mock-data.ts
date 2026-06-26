@@ -45,6 +45,27 @@ export interface Candidate {
   instagram?: string;
   twitter?: string;
   status: "active" | "inactive" | "pending";
+  partylistId?: string;
+}
+
+export interface Partylist {
+  id: string;
+  name: string;
+  acronym: string;
+  description: string;
+  logo: string;
+  color: string;
+}
+
+export interface AdminAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: "super" | "sub";
+  status: "active" | "suspended";
+  lastLogin: string;
+  dateCreated: string;
 }
 
 export interface Election {
@@ -451,6 +472,7 @@ const defaultCandidates: Candidate[] = [
       photo: avatar(name),
       votes: Math.floor(200 + Math.random() * 2200),
       status: "active" as const,
+      partylistId: `party-${(i % 3) + 1}`,
     })),
   ),
   ...awardNominees.map((nom, i) => ({
@@ -464,6 +486,69 @@ const defaultCandidates: Candidate[] = [
     votes: Math.floor(100 + Math.random() * 1500),
     status: "active" as const,
   })),
+];
+
+const defaultPartylists: Partylist[] = [
+  {
+    id: "party-1",
+    name: "Progressive Alliance",
+    acronym: "PA",
+    description:
+      "Fostering campus unity, academic progress, and transparent student representation.",
+    logo: "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=150&auto=format&fit=crop&q=60",
+    color: "#2E86AB",
+  },
+  {
+    id: "party-2",
+    name: "Democratic Student Front",
+    acronym: "DSF",
+    description:
+      "Advocating for student welfare, inclusivity, and campus infrastructure improvement.",
+    logo: "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=150&auto=format&fit=crop&q=60",
+    color: "#A23B72",
+  },
+  {
+    id: "party-3",
+    name: "Students First Initiative",
+    acronym: "SFI",
+    description:
+      "Putting students first in all union policies, financial administration, and event organizing.",
+    logo: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&auto=format&fit=crop&q=60",
+    color: "#3B7A57",
+  },
+];
+
+const defaultAdminAccounts: AdminAccount[] = [
+  {
+    id: "admin-acc-1",
+    name: "Super Admin User",
+    email: "superadmin@votesecure.admin",
+    phone: "+1 (555) 019-2834",
+    role: "super",
+    status: "active",
+    lastLogin: "2026-06-25T14:32:00Z",
+    dateCreated: "2026-01-10T08:00:00Z",
+  },
+  {
+    id: "admin-acc-2",
+    name: "Sub Admin Assistant",
+    email: "subadmin@votesecure.admin",
+    phone: "+1 (555) 014-9821",
+    role: "sub",
+    status: "active",
+    lastLogin: "2026-06-26T09:15:00Z",
+    dateCreated: "2026-03-15T09:30:00Z",
+  },
+  {
+    id: "admin-acc-3",
+    name: "Junior Moderator",
+    email: "moderator@votesecure.admin",
+    phone: "+1 (555) 018-7744",
+    role: "sub",
+    status: "suspended",
+    lastLogin: "2026-06-10T11:20:00Z",
+    dateCreated: "2026-04-01T10:00:00Z",
+  },
 ];
 
 const defaultVoters: Voter[] = Array.from({ length: 120 }, (_, i) => {
@@ -553,12 +638,23 @@ export const notifications: AppNotification[] = getStorageItem<AppNotification[]
   "votesecure_notifications_v2",
   [],
 );
+export const partylists: Partylist[] = getStorageItem<Partylist[]>(
+  "votesecure_partylists_v2",
+  defaultPartylists,
+);
+export const adminAccounts: AdminAccount[] = getStorageItem<AdminAccount[]>(
+  "votesecure_admin_accounts_v2",
+  defaultAdminAccounts,
+);
 
 export const savePositions = () => setStorageItem("votesecure_positions_v2", positions);
 export const saveElections = () => setStorageItem("votesecure_elections_v2", elections);
 export const saveCandidates = () => setStorageItem("votesecure_candidates_v2", candidates);
 export const saveVoters = () => setStorageItem("votesecure_voters_v2", voters);
 export const saveNotifications = () => setStorageItem("votesecure_notifications_v2", notifications);
+export const savePartylists = () => setStorageItem("votesecure_partylists_v2", partylists);
+export const saveAdminAccounts = () =>
+  setStorageItem("votesecure_admin_accounts_v2", adminAccounts);
 
 // Clean up any legacy seeded data from earlier versions on first load.
 if (isBrowser) {
@@ -569,6 +665,8 @@ if (isBrowser) {
     "votesecure_voters",
     "votesecure_notifications",
     "votesecure_voted_elections",
+    "votesecure_partylists",
+    "votesecure_admin_accounts",
   ].forEach((k) => localStorage.removeItem(k));
 }
 
@@ -605,9 +703,11 @@ export const wipeAllElectionsAndVotes = () => {
   elections.length = 0;
   candidates.length = 0;
   positions.length = 0;
+  partylists.length = 0;
   saveElections();
   saveCandidates();
   savePositions();
+  savePartylists();
   if (typeof window !== "undefined") {
     localStorage.removeItem("votesecure_voted_elections");
   }
@@ -629,6 +729,16 @@ export const restoreDemoData = () => {
   defaultCandidates.forEach((c) => candidates.push({ ...c }));
   saveCandidates();
 
+  // Restore default partylists
+  partylists.length = 0;
+  defaultPartylists.forEach((p) => partylists.push(p));
+  savePartylists();
+
+  // Restore default admin accounts
+  adminAccounts.length = 0;
+  defaultAdminAccounts.forEach((a) => adminAccounts.push(a));
+  saveAdminAccounts();
+
   if (typeof window !== "undefined") {
     localStorage.removeItem("votesecure_voted_elections");
   }
@@ -649,6 +759,16 @@ export const restoreCleanDefaults = () => {
   candidates.length = 0;
   defaultCandidates.forEach((c) => candidates.push({ ...c, votes: 0 }));
   saveCandidates();
+
+  // Restore default partylists
+  partylists.length = 0;
+  defaultPartylists.forEach((p) => partylists.push(p));
+  savePartylists();
+
+  // Restore default admin accounts
+  adminAccounts.length = 0;
+  defaultAdminAccounts.forEach((a) => adminAccounts.push(a));
+  saveAdminAccounts();
 
   if (typeof window !== "undefined") {
     localStorage.removeItem("votesecure_voted_elections");

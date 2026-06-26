@@ -115,9 +115,7 @@ export default function Voters() {
     }
 
     if (editingId) {
-      const updated = voters.map((v) =>
-        v.id === editingId ? ({ ...v, ...form } as Voter) : v,
-      );
+      const updated = voters.map((v) => (v.id === editingId ? ({ ...v, ...form } as Voter) : v));
       sync(updated);
       toast.success("Voter updated");
     } else {
@@ -192,14 +190,22 @@ export default function Voters() {
             className="pl-9"
           />
         </div>
-        <Select value={faculty} onValueChange={(v) => { setFaculty(v); setPage(1); }}>
+        <Select
+          value={faculty}
+          onValueChange={(v) => {
+            setFaculty(v);
+            setPage(1);
+          }}
+        >
           <SelectTrigger className="w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Faculties</SelectItem>
             {faculties.map((f) => (
-              <SelectItem key={f} value={f}>{f}</SelectItem>
+              <SelectItem key={f} value={f}>
+                {f}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -366,7 +372,15 @@ export default function Voters() {
       )}
 
       {/* Add / Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(v) => { if (!v) { setDialogOpen(false); setEditingId(null); } }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(v) => {
+          if (!v) {
+            setDialogOpen(false);
+            setEditingId(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit Voter" : "Add Voter"}</DialogTitle>
@@ -411,7 +425,9 @@ export default function Voters() {
                   </SelectTrigger>
                   <SelectContent>
                     {faculties.map((f) => (
-                      <SelectItem key={f} value={f}>{f}</SelectItem>
+                      <SelectItem key={f} value={f}>
+                        {f}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -427,7 +443,9 @@ export default function Voters() {
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((d) => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                      <SelectItem key={d} value={d}>
+                        {d}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -445,7 +463,9 @@ export default function Voters() {
                   </SelectTrigger>
                   <SelectContent>
                     {levels.map((l) => (
-                      <SelectItem key={l} value={l}>Level {l}</SelectItem>
+                      <SelectItem key={l} value={l}>
+                        Level {l}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

@@ -28,7 +28,8 @@ export default function AdminLogin() {
     setLoading(true);
     setTimeout(() => {
       // Allow user if it contains "admin" (either username or email)
-      const isAdmin = data.adminUser.toLowerCase().includes("admin");
+      const usernameLower = data.adminUser.toLowerCase();
+      const isAdmin = usernameLower.includes("admin");
 
       if (!isAdmin) {
         toast.error("Invalid administrator credentials. Access denied.");
@@ -37,11 +38,20 @@ export default function AdminLogin() {
         return;
       }
 
+      // Detect adminRole based on user input
+      let adminRole: "super" | "sub" = "super";
+      if (usernameLower.includes("sub")) {
+        adminRole = "sub";
+      } else if (usernameLower.includes("super")) {
+        adminRole = "super";
+      }
+
       login({
         id: "admin-" + Date.now(),
         name: data.adminUser,
         email: data.adminUser + "@votesecure.admin",
         role: "admin",
+        adminRole,
         token: "admin-sess-" + Date.now(),
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.adminUser)}&background=022C22&color=34D399&bold=true`,
         twoFAEnabled: false,

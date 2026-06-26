@@ -17,6 +17,8 @@ import {
   LogOut,
   Search,
   User,
+  Flag,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth, useTheme } from "@/lib/auth-store";
 import { Logo } from "@/components/shared/Logo";
@@ -31,45 +33,52 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
-const sections = [
-  {
-    label: "DASHBOARD",
-    items: [{ to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard }],
-  },
-  {
-    label: "ELECTIONS",
-    items: [{ to: "/admin/elections", label: "Elections", icon: Vote }],
-  },
-  {
-    label: "SETUP",
-    items: [
-      { to: "/admin/positions", label: "Positions", icon: Briefcase },
-      { to: "/admin/candidates", label: "Candidates", icon: UserCheck },
-    ],
-  },
-  {
-    label: "VOTERS",
-    items: [{ to: "/admin/voters", label: "Manage Voters", icon: Users }],
-  },
-  {
-    label: "ANALYTICS",
-    items: [{ to: "/admin/reports", label: "Reports", icon: FileBarChart }],
-  },
-  {
-    label: "SYSTEM",
-    items: [
-      { to: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
-      { to: "/admin/settings", label: "Settings", icon: Settings },
-    ],
-  },
-];
-
 export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const user = useAuth((s) => s.user);
   const logout = useAuth((s) => s.logout);
   const { theme, toggle } = useTheme();
   const nav = useNavigate();
+
+  const isSuper = user?.adminRole === "super";
+
+  const sections = [
+    {
+      label: "DASHBOARD",
+      items: [{ to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    },
+    {
+      label: "ELECTIONS",
+      items: [{ to: "/admin/elections", label: "Elections", icon: Vote }],
+    },
+    {
+      label: "SETUP",
+      items: [
+        { to: "/admin/positions", label: "Positions", icon: Briefcase },
+        { to: "/admin/candidates", label: "Candidates", icon: UserCheck },
+        { to: "/admin/partylists", label: "Partylists", icon: Flag },
+      ],
+    },
+    {
+      label: "VOTERS",
+      items: [{ to: "/admin/voters", label: "Manage Voters", icon: Users }],
+    },
+    {
+      label: "ANALYTICS",
+      items: [{ to: "/admin/reports", label: "Reports", icon: FileBarChart }],
+    },
+    {
+      label: "SYSTEM",
+      items: [
+        { to: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
+        ...(isSuper
+          ? [{ to: "/admin/manage-admins", label: "Admin Accounts", icon: ShieldCheck }]
+          : []),
+        { to: "/admin/settings", label: "Settings", icon: Settings },
+      ],
+    },
+  ];
+
   const handleLogout = () => {
     logout();
     nav("/login");

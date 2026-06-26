@@ -11,6 +11,7 @@ import {
   ScrollText,
   TrendingUp,
   Trash2,
+  Flag,
 } from "lucide-react";
 import {
   elections,
@@ -23,6 +24,7 @@ import {
   wipeAllElectionsAndVotes,
   restoreCleanDefaults,
   positions,
+  partylists,
 } from "@/lib/mock-data";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
 import { Button } from "@/components/ui/button";
@@ -113,6 +115,13 @@ export default function AdminDashboard() {
       color: "bg-warning/15 text-warning",
       trend: "Action logs active",
     },
+    {
+      label: "Total Partylists",
+      value: partylists.length,
+      icon: Flag,
+      color: "bg-teal-500/15 text-teal-600 dark:text-teal-400",
+      trend: "Political coalitions",
+    },
   ];
 
   const totalVotesCast = elections.reduce((sum, e) => sum + e.votesCast, 0);
@@ -161,7 +170,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {dynamicStats.map((s) => (
           <div key={s.label} className="rounded-xl bg-card border border-border p-5 shadow-soft">
             <div className="flex items-start justify-between">

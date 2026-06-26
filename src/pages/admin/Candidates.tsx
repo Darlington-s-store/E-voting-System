@@ -5,6 +5,7 @@ import {
   candidates as mockCandidates,
   positions,
   elections,
+  partylists,
   saveCandidates,
   type Candidate,
 } from "@/lib/mock-data";
@@ -254,9 +255,24 @@ export default function Candidates() {
                         <h3 className="mt-4 font-bold text-base leading-tight group-hover:text-brand transition-colors">
                           {c.name}
                         </h3>
-                        <span className="text-[10px] text-muted-foreground mt-1 font-semibold uppercase tracking-wider">
-                          {getElectionName(c.electionId)}
-                        </span>
+                        <div className="flex flex-col items-center gap-1 mt-1">
+                          <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                            {getElectionName(c.electionId)}
+                          </span>
+                          {c.partylistId &&
+                            (() => {
+                              const party = partylists.find((p) => p.id === c.partylistId);
+                              if (!party) return null;
+                              return (
+                                <span
+                                  className="px-2 py-0.5 rounded text-[10px] font-extrabold text-white shadow-sm"
+                                  style={{ backgroundColor: party.color }}
+                                >
+                                  {party.acronym}
+                                </span>
+                              );
+                            })()}
+                        </div>
 
                         <p className="text-xs text-muted-foreground line-clamp-3 mt-2 px-1 text-center h-12 leading-relaxed">
                           {c.bio || "No biography provided."}

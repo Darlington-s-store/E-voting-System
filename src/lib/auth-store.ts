@@ -8,6 +8,7 @@ export interface AuthUser {
   name: string;
   email: string;
   role: Role;
+  adminRole?: "super" | "sub";
   token: string;
   studentId?: string;
   department?: string;

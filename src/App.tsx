@@ -37,6 +37,8 @@ import AdminCandidates from "@/pages/admin/Candidates";
 import AdminCreateCandidate from "@/pages/admin/CreateCandidate";
 import AdminEditCandidate from "@/pages/admin/EditCandidate";
 import AdminPositions from "@/pages/admin/Positions";
+import AdminPartylists from "@/pages/admin/Partylists";
+import AdminManageAdmins from "@/pages/admin/Admins";
 import AdminReports from "@/pages/admin/Reports";
 import AdminAuditLogs from "@/pages/admin/AuditLogs";
 import AdminSettings from "@/pages/admin/Settings";
@@ -92,6 +94,8 @@ export default function App() {
             <Route path="/admin/candidates/create" element={<AdminCreateCandidate />} />
             <Route path="/admin/candidates/:id/edit" element={<AdminEditCandidate />} />
             <Route path="/admin/positions" element={<AdminPositions />} />
+            <Route path="/admin/partylists" element={<AdminPartylists />} />
+            <Route path="/admin/manage-admins" element={<AdminManageAdmins />} />
             <Route path="/admin/reports" element={<AdminReports />} />
             <Route path="/admin/audit-logs" element={<AdminAuditLogs />} />
             <Route path="/admin/settings" element={<AdminSettings />} />

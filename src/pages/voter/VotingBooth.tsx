@@ -20,6 +20,7 @@ import {
   getElection,
   getPositionsForElection,
   getCandidatesForPosition,
+  partylists,
   type Candidate,
 } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-store";
@@ -363,11 +364,25 @@ export default function VotingBooth() {
                             {c.name}
                           </h3>
 
-                          {/* Position badge */}
-                          <div className="flex justify-center mt-1.5">
+                          {/* Position badge & Partylist */}
+                          <div className="flex flex-wrap items-center justify-center gap-1.5 mt-1.5">
                             <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#2E86AB]/10 text-[#2E86AB] uppercase tracking-wide">
                               {currentPosition.name}
                             </span>
+                            {c.partylistId &&
+                              (() => {
+                                const party = partylists.find((p) => p.id === c.partylistId);
+                                if (!party) return null;
+                                return (
+                                  <span
+                                    className="px-2.5 py-0.5 rounded-full text-[11px] font-bold text-white shadow-sm"
+                                    style={{ backgroundColor: party.color }}
+                                    title={party.name}
+                                  >
+                                    {party.acronym}
+                                  </span>
+                                );
+                              })()}
                           </div>
 
                           {/* Tagline/slogan */}
