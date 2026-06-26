@@ -28,6 +28,7 @@ export interface Position {
     | "Only admins can view";
   anonymousVoting: boolean;
   voteConfirmation: boolean;
+  displayOrder?: number;
 }
 
 export interface Candidate {
