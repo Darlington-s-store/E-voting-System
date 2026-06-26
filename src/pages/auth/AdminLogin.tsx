@@ -32,7 +32,9 @@ export default function AdminLogin() {
         const parsed = JSON.parse(stored);
         return parsed.attempts || 0;
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to read admin lockout attempts", e);
+    }
     return 0;
   });
 
@@ -47,7 +49,9 @@ export default function AdminLogin() {
           if (until > Date.now()) return until;
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to read admin lockout timestamp", e);
+    }
     return null;
   });
 
