@@ -109,7 +109,14 @@ export default function ElectionDetail() {
 
         {/* Dynamic Voting Button block */}
         <div className="relative z-10 shrink-0 self-stretch md:self-auto flex flex-col justify-center">
-          {hasVoted ? (
+          {election.status === "archived" ? (
+            <Button
+              className="w-full md:w-auto font-extrabold text-sm px-6 h-11 rounded-xl shadow-md bg-success hover:bg-success/90 text-white flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5"
+              onClick={() => navigate(`/voter/elections/${election.id}/results`)}
+            >
+              View Final Results <ChevronRight className="ml-1 w-4 h-4" />
+            </Button>
+          ) : hasVoted ? (
             <div className="p-4 rounded-xl bg-success/10 border border-success/35 text-center flex flex-col items-center gap-1">
               <CheckCircle2 className="w-8 h-8 text-success" />
               <span className="text-xs font-extrabold text-success uppercase tracking-wider mt-1">

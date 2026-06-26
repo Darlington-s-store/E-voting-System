@@ -186,18 +186,30 @@ export default function VoterElections() {
                     {positionsList.length} Portfolios listed
                   </span>
 
-                  <Link to={`/voter/elections/${e.id}`}>
-                    <Button
-                      size="sm"
-                      className={`font-bold text-xs h-8.5 rounded-lg px-4 shadow-sm transition-all flex items-center gap-1.5 ${
-                        isAwards
-                          ? "bg-[#F4C430] hover:bg-[#F4C430]/95 text-black"
-                          : "bg-brand text-white hover:bg-brand/90"
-                      }`}
-                    >
-                      View details <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    {e.status === "archived" && (
+                      <Link to={`/voter/elections/${e.id}/results`}>
+                        <Button
+                          size="sm"
+                          className="font-bold text-xs h-8.5 rounded-lg px-4 shadow-sm transition-all bg-success hover:bg-success/90 text-white flex items-center gap-1.5"
+                        >
+                          View Results <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+                    )}
+                    <Link to={`/voter/elections/${e.id}`}>
+                      <Button
+                        size="sm"
+                        className={`font-bold text-xs h-8.5 rounded-lg px-4 shadow-sm transition-all flex items-center gap-1.5 ${
+                          isAwards
+                            ? "bg-[#F4C430]/20 text-[#F4C430] border border-[#F4C430]/30 hover:bg-[#F4C430]/35"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                        }`}
+                      >
+                        View Details <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             );

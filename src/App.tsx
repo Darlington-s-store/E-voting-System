@@ -72,6 +72,7 @@ export default function App() {
             <Route path="/voter/dashboard" element={<VoterDashboard />} />
             <Route path="/voter/elections" element={<VoterElections />} />
             <Route path="/voter/elections/:id" element={<VoterElectionDetail />} />
+            <Route path="/voter/elections/:id/results" element={<AdminResults />} />
             <Route path="/voter/elections/:id/vote" element={<VotingBooth />} />
             <Route path="/voter/awards/:id/vote" element={<AwardsVotingBooth />} />
             <Route path="/voter/history" element={<VoterHistory />} />
