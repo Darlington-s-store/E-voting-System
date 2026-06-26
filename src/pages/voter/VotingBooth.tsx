@@ -267,140 +267,150 @@ export default function VotingBooth() {
                 </div>
               </div>
             )}
-
-            <div className="rounded-2xl bg-card border border-border p-6 md:p-8 shadow-soft space-y-6">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div>
-                  <span className="text-[10px] font-bold text-brand uppercase tracking-wider block">
-                    Portfolio {positionIdx + 1} of {eligiblePositions.length}
+            <div className="rounded-2xl bg-card border border-border overflow-hidden shadow-soft">
+              {/* Position header (full-width navy bar) */}
+              <div className="bg-[#1E3A5F] text-white px-6 py-5 flex items-center justify-between border-b border-[#1E3A5F]/20">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    Voting for:
                   </span>
-                  <h2 className="text-2xl font-black mt-1">
-                    Select Candidate for: <span className="text-brand">{currentPosition.name}</span>
+                  <h2 className="text-xl md:text-2xl font-black tracking-tight">
+                    {currentPosition.name}
                   </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {currentPosition.description}
-                  </p>
                 </div>
-
-                {/* Dots indicator */}
-                <div className="flex gap-1.5 shrink-0">
-                  {eligiblePositions.map((_, i) => (
-                    <span
-                      key={i}
-                      className={`w-6 h-1.5 rounded-full transition-all ${
-                        i === positionIdx
-                          ? "bg-brand w-9"
-                          : i < positionIdx
-                            ? "bg-success"
-                            : "bg-muted"
-                      }`}
-                    />
-                  ))}
+                <div className="text-right shrink-0">
+                  <span className="text-sm font-extrabold bg-white/10 px-3 py-1 rounded-lg">
+                    Position {positionIdx + 1} of {eligiblePositions.length}
+                  </span>
                 </div>
               </div>
 
-              {/* Grid cards */}
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {candidates.map((c) => {
-                  const selected = selectedCandidateId === c.id;
-                  const isAnySelected = !!selectedCandidateId;
+              <div className="p-6 md:p-8 space-y-6">
+                {/* Progress dots row below */}
+                <div className="flex items-center gap-2 pb-2">
+                  {eligiblePositions.map((p, i) => {
+                    const hasVoted = !!selections[p.id];
+                    const isCurrent = i === positionIdx;
 
-                  return (
-                    <div
-                      key={c.id}
-                      onClick={() => setSelections({ ...selections, [currentPosition.id]: c.id })}
-                      className={`relative text-left rounded-2xl p-5 border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-                        selected
-                          ? "shadow-md scale-[1.01]"
-                          : isAnySelected
-                            ? "opacity-65 hover:opacity-100 hover:-translate-y-0.5"
-                            : "hover:-translate-y-0.5 shadow-soft"
-                      }`}
-                      style={{
-                        borderColor: selected ? "#2E86AB" : "#E2E8F0",
-                        backgroundColor: selected ? "rgba(46, 134, 171, 0.05)" : "#FFFFFF",
-                      }}
-                    >
-                      <div>
-                        {/* Top-right corner checkmark selection */}
-                        <div className="absolute top-4 right-4">
-                          {selected ? (
-                            <div className="w-6 h-6 rounded-full bg-[#2E86AB] flex items-center justify-center text-white shadow-sm border border-[#2E86AB]">
-                              <CheckCircle2 className="w-4 h-4 text-white fill-current" />
-                            </div>
-                          ) : (
-                            <div className="w-6 h-6 rounded-full border border-slate-300 bg-white" />
-                          )}
+                    return (
+                      <div
+                        key={p.id}
+                        title={p.name}
+                        className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                          hasVoted
+                            ? "bg-[#1E3A5F] border border-[#1E3A5F]"
+                            : isCurrent
+                              ? "bg-white border-2 border-[#1E3A5F]"
+                              : "bg-slate-300 border border-slate-300"
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Candidate grid (2 col desktop, 1 col mobile, gap 20px) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[20px]">
+                  {candidates.map((c) => {
+                    const selected = selectedCandidateId === c.id;
+                    const isAnySelected = !!selectedCandidateId;
+
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => setSelections({ ...selections, [currentPosition.id]: c.id })}
+                        className={`relative text-left rounded-2xl p-5 border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between ${
+                          selected
+                            ? "shadow-md scale-[1.01]"
+                            : isAnySelected
+                              ? "opacity-65 hover:opacity-100 hover:-translate-y-0.5"
+                              : "hover:-translate-y-0.5 shadow-soft"
+                        }`}
+                        style={{
+                          borderColor: selected ? "#2E86AB" : "#E2E8F0",
+                          backgroundColor: selected ? "rgba(46, 134, 171, 0.05)" : "#FFFFFF",
+                        }}
+                      >
+                        <div>
+                          {/* Top-right corner checkmark selection */}
+                          <div className="absolute top-4 right-4">
+                            {selected ? (
+                              <div className="w-6 h-6 rounded-full bg-[#2E86AB] flex items-center justify-center text-white shadow-sm border border-[#2E86AB]">
+                                <CheckCircle2 className="w-4 h-4 text-white fill-current" />
+                              </div>
+                            ) : (
+                              <div className="w-6 h-6 rounded-full border border-slate-300 bg-white" />
+                            )}
+                          </div>
+
+                          {/* Candidate photo */}
+                          <div className="flex justify-center w-full mt-2">
+                            <img
+                              src={
+                                c.photo ||
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                  c.name,
+                                )}&background=2E86AB&color=fff&bold=true&size=256`
+                              }
+                              alt={c.name}
+                              className={`w-[100px] h-[100px] rounded-full object-cover border border-border/80 shadow-sm transition-all duration-300 ${
+                                selected ? "outline outline-[3px] outline-[#2E86AB]" : ""
+                              }`}
+                            />
+                          </div>
+
+                          {/* Candidate name */}
+                          <h3 className="mt-4 font-bold text-[18px] text-center text-foreground">
+                            {c.name}
+                          </h3>
+
+                          {/* Position badge */}
+                          <div className="flex justify-center mt-1.5">
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#2E86AB]/10 text-[#2E86AB] uppercase tracking-wide">
+                              {currentPosition.name}
+                            </span>
+                          </div>
+
+                          {/* Tagline/slogan */}
+                          <p className="mt-3 text-[14px] italic text-muted-foreground text-center line-clamp-2 h-10 leading-snug">
+                            "{c.campaignMessage || "Empowering representation, moving forward."}"
+                          </p>
+
+                          {/* Bio excerpt */}
+                          <p className="mt-4 text-[13px] text-muted-foreground text-left line-clamp-3 h-[60px] leading-relaxed">
+                            {c.bio || "No biography provided by candidate."}
+                          </p>
                         </div>
 
-                        {/* Candidate photo */}
-                        <div className="flex justify-center w-full mt-2">
-                          <img
-                            src={
-                              c.photo ||
-                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                c.name,
-                              )}&background=2E86AB&color=fff&bold=true&size=256`
-                            }
-                            alt={c.name}
-                            className={`w-[100px] h-[100px] rounded-full object-cover border border-border/80 shadow-sm transition-all duration-300 ${
-                              selected ? "outline outline-[3px] outline-[#2E86AB]" : ""
-                            }`}
-                          />
+                        {/* Buttons row */}
+                        <div className="mt-6 pt-4 border-t border-border/60 w-full flex items-center justify-between gap-2.5 w-full">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveCandidateId(c.id);
+                            }}
+                            className="flex-1 h-8 text-xs font-semibold border-slate-200 text-slate-700 hover:bg-slate-50"
+                          >
+                            View Profile
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelections({ ...selections, [currentPosition.id]: c.id });
+                            }}
+                            className="flex-1 h-8 text-xs font-bold bg-[#2E86AB] hover:bg-[#2E86AB]/90 text-white shadow-sm"
+                          >
+                            {selected ? "✓ Selected" : `Select ${c.name.split(" ")[0]}`}
+                          </Button>
                         </div>
-
-                        {/* Candidate name */}
-                        <h3 className="mt-4 font-bold text-[18px] text-center text-foreground">
-                          {c.name}
-                        </h3>
-
-                        {/* Position badge */}
-                        <div className="flex justify-center mt-1.5">
-                          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#2E86AB]/10 text-[#2E86AB] uppercase tracking-wide">
-                            {currentPosition.name}
-                          </span>
-                        </div>
-
-                        {/* Tagline/slogan */}
-                        <p className="mt-3 text-[14px] italic text-muted-foreground text-center line-clamp-2 h-10 leading-snug">
-                          "{c.campaignMessage || "Empowering representation, moving forward."}"
-                        </p>
-
-                        {/* Bio excerpt */}
-                        <p className="mt-4 text-[13px] text-muted-foreground text-left line-clamp-3 h-[60px] leading-relaxed">
-                          {c.bio || "No biography provided by candidate."}
-                        </p>
                       </div>
-
-                      {/* Buttons row */}
-                      <div className="mt-6 pt-4 border-t border-border/40 flex items-center justify-between gap-2.5 w-full">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActiveCandidateId(c.id);
-                          }}
-                          className="flex-1 h-8 text-xs font-semibold border-slate-200 text-slate-700 hover:bg-slate-50"
-                        >
-                          View Profile
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelections({ ...selections, [currentPosition.id]: c.id });
-                          }}
-                          className="flex-1 h-8 text-xs font-bold bg-[#2E86AB] hover:bg-[#2E86AB]/90 text-white shadow-sm"
-                        >
-                          {selected ? "✓ Selected" : `Select ${c.name.split(" ")[0]}`}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
