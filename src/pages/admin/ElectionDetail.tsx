@@ -10,10 +10,18 @@ import {
   Users,
   Briefcase,
 } from "lucide-react";
-import { getElection, getPositionsForElection, elections, saveElections } from "@/lib/mock-data";
+import {
+  getElection,
+  getPositionsForElection,
+  elections,
+  saveElections,
+  validateElectionStart,
+  voters,
+} from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { toast } from "sonner";
 import {
@@ -32,6 +40,7 @@ export default function ElectionDetail() {
   const [election, setElection] = useState(() => getElection(id));
   const [confirmAction, setConfirmAction] = useState<"open" | "close" | "publish" | null>(null);
   const [confirmText, setConfirmText] = useState("");
+  const [sendNotifications, setSendNotifications] = useState(true);
 
   if (!election) return <div className="p-8 text-center font-bold">Election not found</div>;
 
@@ -44,19 +53,37 @@ export default function ElectionDetail() {
   const handleConfirmAction = () => {
     if (!confirmAction) return;
 
+    if (confirmAction === "open") {
+      const { isValid } = validateElectionStart(election.id);
+      if (!isValid) {
+        toast.error("Election failed validation. Cannot start.");
+        return;
+      }
+    }
+
     let newStatus: "open" | "closed" | "archived" = "open";
+    let startTimestamp: string | undefined = undefined;
     if (confirmAction === "close") {
       newStatus = "closed";
     } else if (confirmAction === "publish") {
       newStatus = "archived";
+    } else if (confirmAction === "open") {
+      startTimestamp = new Date().toISOString();
     }
 
     const idx = elections.findIndex((x) => x.id === election.id);
     if (idx !== -1) {
-      elections[idx] = { ...elections[idx], status: newStatus };
+      elections[idx] = {
+        ...elections[idx],
+        status: newStatus,
+        ...(startTimestamp ? { startDate: startTimestamp } : {}),
+      };
       saveElections();
       setElection(elections[idx]);
       toast.success(`Election status updated to ${newStatus}`);
+      if (confirmAction === "open" && sendNotifications) {
+        toast.info(`Automated email & SMS sent to ${voters.length} registered voters.`);
+      }
     }
 
     setConfirmAction(null);
@@ -168,17 +195,63 @@ export default function ElectionDetail() {
                     Start Election Confirmation
                   </AlertDialogTitle>
                 </div>
-                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground space-y-3">
+                <div className="text-sm leading-relaxed text-muted-foreground space-y-3">
                   <div>
-                    You are about to open voting for the election:{" "}
-                    <strong className="text-foreground">"{election.name}"</strong>.
+                    Are you sure you want to open voting for the election:{" "}
+                    <strong className="text-foreground">"{election.name}"</strong>?
                   </div>
-                  <div className="p-3 bg-success/5 border border-success/10 rounded-xl space-y-1.5 text-xs text-success font-medium">
-                    <div>✅ Allow eligible voters to cast votes immediately</div>
-                    <div>✅ Make the voting booth live immediately</div>
-                    <div>⚠️ Once started, candidates cannot be added or removed.</div>
+
+                  {/* Validation Checklist */}
+                  {(() => {
+                    const result = validateElectionStart(election.id);
+                    return (
+                      <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-3">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block text-left">
+                          System Validation Checks
+                        </span>
+                        <div className="space-y-2 text-xs">
+                          {result.checklist.map((item) => (
+                            <div key={item.key} className="flex items-start gap-2 text-left">
+                              {item.isValid ? (
+                                <span className="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                                  ✓
+                                </span>
+                              ) : (
+                                <span className="w-4 h-4 rounded-full bg-danger/10 text-danger flex items-center justify-center font-bold shrink-0 mt-0.5">
+                                  ✗
+                                </span>
+                              )}
+                              <div>
+                                <span className="font-semibold text-foreground block leading-none">
+                                  {item.label}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                                  {item.message}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Notification option toggle */}
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <Checkbox
+                      id="send-notif-detail"
+                      checked={sendNotifications}
+                      onCheckedChange={(checked) => setSendNotifications(checked === true)}
+                    />
+                    <label
+                      htmlFor="send-notif-detail"
+                      className="text-xs text-foreground font-semibold cursor-pointer select-none"
+                    >
+                      Send automated email & SMS — "Voting is now open"
+                    </label>
                   </div>
-                  <div className="space-y-1.5 pt-2">
+
+                  <div className="space-y-1.5 pt-2 text-left">
                     <Label htmlFor="type-start" className="text-xs font-semibold text-foreground">
                       Type <span className="font-extrabold">"START"</span> to confirm:
                     </Label>
@@ -190,7 +263,7 @@ export default function ElectionDetail() {
                       className="h-10 text-sm font-bold uppercase tracking-wider"
                     />
                   </div>
-                </AlertDialogDescription>
+                </div>
               </>
             )}
 
@@ -250,7 +323,8 @@ export default function ElectionDetail() {
             <AlertDialogAction
               onClick={handleConfirmAction}
               disabled={
-                (confirmAction === "open" && confirmText !== "START") ||
+                (confirmAction === "open" &&
+                  (confirmText !== "START" || !validateElectionStart(election.id).isValid)) ||
                 (confirmAction === "close" && confirmText !== "CLOSE")
               }
               className={`font-semibold shadow-sm ${

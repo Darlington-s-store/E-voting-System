@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Trash2,
   Flag,
+  PlayCircle,
 } from "lucide-react";
 import {
   elections,
@@ -25,6 +26,9 @@ import {
   restoreCleanDefaults,
   positions,
   partylists,
+  validateElectionStart,
+  saveElections,
+  type Election,
 } from "@/lib/mock-data";
 import { AnimatedCounter } from "@/components/shared/AnimatedCounter";
 import { Button } from "@/components/ui/button";
@@ -38,6 +42,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   BarChart,
@@ -68,6 +73,52 @@ const quick = [
 
 export default function AdminDashboard() {
   const [confirmReset, setConfirmReset] = useState(false);
+  const [launchElection, setLaunchElection] = useState<Election | null>(null);
+  const [sendNotifications, setSendNotifications] = useState(true);
+
+  const handleLaunchElection = () => {
+    if (!launchElection) return;
+
+    const { isValid } = validateElectionStart(launchElection.id);
+    if (!isValid) {
+      toast.error("Election failed validation. Cannot start.");
+      return;
+    }
+
+    const idx = elections.findIndex((e) => e.id === launchElection.id);
+    if (idx !== -1) {
+      elections[idx] = {
+        ...elections[idx],
+        status: "open",
+        startDate: new Date().toISOString(),
+      };
+      saveElections();
+
+      // Log activity
+      auditLogs.unshift({
+        id: `log-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user: "Super Admin User",
+        role: "admin",
+        action: "UPDATE",
+        entity: `Election: ${elections[idx].name}`,
+        ip: "192.168.1.1",
+        details: `Started election. Notifications sent via Email/SMS: ${sendNotifications ? "Yes" : "No"}.`,
+      });
+
+      toast.success(`"${elections[idx].name}" is now live!`);
+      if (sendNotifications) {
+        toast.info(
+          `Automated email & SMS notifications sent to ${voters.length} registered voters.`,
+        );
+      }
+    }
+
+    setLaunchElection(null);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
 
   const handleDashboardAction = (action: "resetVotes" | "wipe" | "restoreClean") => {
     if (action === "resetVotes") {
@@ -147,12 +198,24 @@ export default function AdminDashboard() {
     { name: "Closed", value: closedCount, color: "var(--color-danger)" },
   ];
 
+  const launchableElections = elections.filter(
+    (e) => e.status === "draft" || e.status === "scheduled",
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to your election command center</p>
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Welcome to your election command center</p>
+          </div>
+          {elections.some((e) => e.status === "open") && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-success/15 text-success border border-success/30 shadow-sm animate-pulse mt-1 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-success animate-ping" />
+              ELECTION ACTIVE
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -169,6 +232,33 @@ export default function AdminDashboard() {
           </Link>
         </div>
       </div>
+
+      {/* Election Launchpad banner */}
+      {launchableElections.length > 0 && (
+        <div className="rounded-xl border border-brand/20 bg-gradient-to-r from-brand/5 to-emerald-500/5 p-5 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+              <PlayCircle className="w-5 h-5 text-brand" /> Election Launchpad
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              You have {launchableElections.length} pending election(s) configured. You can start
+              them immediately from here.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {launchableElections.map((e) => (
+              <Button
+                key={e.id}
+                size="sm"
+                onClick={() => setLaunchElection(e)}
+                className="bg-brand text-white hover:bg-brand/90 text-xs font-semibold h-8.5 rounded-lg"
+              >
+                Launch "{e.name.length > 25 ? e.name.substring(0, 22) + "..." : e.name}"
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {dynamicStats.map((s) => (
@@ -248,19 +338,31 @@ export default function AdminDashboard() {
           </div>
           <div className="space-y-2">
             {elections.map((e) => (
-              <Link
+              <div
                 key={e.id}
-                to={`/admin/elections/${e.id}`}
-                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted"
+                className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/40 transition group border border-transparent"
               >
-                <div>
-                  <div className="font-semibold text-sm">{e.name}</div>
+                <Link to={`/admin/elections/${e.id}`} className="flex-1">
+                  <div className="font-semibold text-sm group-hover:text-brand transition">
+                    {e.name}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {e.votesCast.toLocaleString()} / {e.totalEligible.toLocaleString()} votes
                   </div>
+                </Link>
+                <div className="flex items-center gap-3">
+                  {(e.status === "draft" || e.status === "scheduled") && (
+                    <Button
+                      size="sm"
+                      onClick={() => setLaunchElection(e)}
+                      className="bg-success/15 hover:bg-success/20 text-success text-xs font-bold h-7.5 px-3 rounded-lg border border-success/20"
+                    >
+                      Start Election
+                    </Button>
+                  )}
+                  <StatusBadge status={e.status} />
                 </div>
-                <StatusBadge status={e.status} />
-              </Link>
+              </div>
             ))}
           </div>
         </div>
@@ -359,6 +461,90 @@ export default function AdminDashboard() {
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Start Election Confirmation Modal with Validation Checklist */}
+      <AlertDialog
+        open={!!launchElection}
+        onOpenChange={(open) => !open && setLaunchElection(null)}
+      >
+        <AlertDialogContent className="rounded-2xl max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2 text-brand mb-1">
+              <PlayCircle className="w-5 h-5 shrink-0 text-brand" />
+              <AlertDialogTitle className="text-lg font-bold">
+                Start Election Confirmation
+              </AlertDialogTitle>
+            </div>
+            <div className="text-sm leading-relaxed text-muted-foreground space-y-4">
+              <div>
+                Are you sure you want to open voting for the election:{" "}
+                <strong className="text-foreground">"{launchElection?.name}"</strong>?
+              </div>
+
+              {/* Validation Checklist */}
+              {launchElection &&
+                (() => {
+                  const result = validateElectionStart(launchElection.id);
+                  return (
+                    <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-3">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                        System Validation Checks
+                      </span>
+                      <div className="space-y-2 text-xs">
+                        {result.checklist.map((item) => (
+                          <div key={item.key} className="flex items-start gap-2">
+                            {item.isValid ? (
+                              <span className="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                                ✓
+                              </span>
+                            ) : (
+                              <span className="w-4 h-4 rounded-full bg-danger/10 text-danger flex items-center justify-center font-bold shrink-0 mt-0.5">
+                                ✗
+                              </span>
+                            )}
+                            <div>
+                              <span className="font-semibold text-foreground block leading-none">
+                                {item.label}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                                {item.message}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+              {/* Notification option toggle */}
+              <div className="flex items-center gap-2.5 pt-2">
+                <Checkbox
+                  id="send-notif"
+                  checked={sendNotifications}
+                  onCheckedChange={(checked) => setSendNotifications(checked === true)}
+                />
+                <label
+                  htmlFor="send-notif"
+                  className="text-xs text-foreground font-semibold cursor-pointer select-none"
+                >
+                  Send automated email & SMS — "Voting is now open"
+                </label>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-0 mt-4">
+            <AlertDialogCancel className="font-semibold">Cancel</AlertDialogCancel>
+            <Button
+              disabled={launchElection ? !validateElectionStart(launchElection.id).isValid : true}
+              onClick={handleLaunchElection}
+              className="bg-success text-white hover:bg-success/90 font-semibold"
+            >
+              Confirm & Start
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

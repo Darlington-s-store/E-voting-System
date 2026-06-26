@@ -18,6 +18,8 @@ import {
   getPositionsForElection,
   positions,
   saveElections,
+  validateElectionStart,
+  voters,
 } from "@/lib/mock-data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,6 +66,7 @@ export default function AdminElections() {
   const [tab, setTab] = useState<"all" | "draft" | "scheduled" | "open" | "closed">("all");
   const [confirmAction, setConfirmAction] = useState<{ type: string; id: string } | null>(null);
   const [confirmText, setConfirmText] = useState("");
+  const [sendNotifications, setSendNotifications] = useState(true);
 
   const openConfirmModal = (action: { type: string; id: string }) => {
     setConfirmText("");
@@ -134,8 +137,18 @@ export default function AdminElections() {
       updatedElections = items.filter((x) => x.id !== id);
       toast.success("Election deleted");
     } else if (type === "open") {
-      updatedElections = items.map((x) => (x.id === id ? { ...x, status: "open" as const } : x));
+      const { isValid } = validateElectionStart(id);
+      if (!isValid) {
+        toast.error("Election failed validation. Cannot start.");
+        return;
+      }
+      updatedElections = items.map((x) =>
+        x.id === id ? { ...x, status: "open" as const, startDate: new Date().toISOString() } : x,
+      );
       toast.success("Election is now open");
+      if (sendNotifications) {
+        toast.info(`Automated email & SMS sent to ${voters.length} registered voters.`);
+      }
     } else if (type === "close") {
       updatedElections = items.map((x) => (x.id === id ? { ...x, status: "closed" as const } : x));
       toast.success("Election is now closed");
@@ -394,11 +407,63 @@ export default function AdminElections() {
                 <AlertDialogTitle className="text-lg font-bold text-success flex items-center gap-2">
                   <PlayCircle className="w-5 h-5" /> Start Election Confirmation
                 </AlertDialogTitle>
-                <AlertDialogDescription className="text-sm leading-relaxed text-muted-foreground space-y-3">
+                <div className="text-sm leading-relaxed text-muted-foreground space-y-3">
                   <div>
-                    You are about to open voting. This will allow all eligible voters to cast votes
-                    immediately and make the voting booth live.
+                    Are you sure you want to open voting? This will allow all eligible voters to
+                    cast votes immediately and make the voting booth live.
                   </div>
+
+                  {/* Validation Checklist */}
+                  {confirmAction?.id &&
+                    (() => {
+                      const result = validateElectionStart(confirmAction.id);
+                      return (
+                        <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-3">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                            System Validation Checks
+                          </span>
+                          <div className="space-y-2 text-xs">
+                            {result.checklist.map((item) => (
+                              <div key={item.key} className="flex items-start gap-2 text-left">
+                                {item.isValid ? (
+                                  <span className="w-4 h-4 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                                    ✓
+                                  </span>
+                                ) : (
+                                  <span className="w-4 h-4 rounded-full bg-danger/10 text-danger flex items-center justify-center font-bold shrink-0 mt-0.5">
+                                    ✗
+                                  </span>
+                                )}
+                                <div>
+                                  <span className="font-semibold text-foreground block leading-none">
+                                    {item.label}
+                                  </span>
+                                  <span className="text-[10px] text-muted-foreground mt-0.5 block">
+                                    {item.message}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  {/* Notification option toggle */}
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <Checkbox
+                      id="send-notif-list"
+                      checked={sendNotifications}
+                      onCheckedChange={(checked) => setSendNotifications(checked === true)}
+                    />
+                    <label
+                      htmlFor="send-notif-list"
+                      className="text-xs text-foreground font-semibold cursor-pointer select-none"
+                    >
+                      Send automated email & SMS — "Voting is now open"
+                    </label>
+                  </div>
+
                   <div className="space-y-1.5 pt-2">
                     <Label
                       htmlFor="type-start-list"
@@ -414,7 +479,7 @@ export default function AdminElections() {
                       className="h-10 text-sm font-bold uppercase tracking-wider"
                     />
                   </div>
-                </AlertDialogDescription>
+                </div>
               </>
             )}
 
@@ -476,7 +541,8 @@ export default function AdminElections() {
             <AlertDialogAction
               onClick={handleConfirmAction}
               disabled={
-                (confirmAction?.type === "open" && confirmText !== "START") ||
+                (confirmAction?.type === "open" &&
+                  (confirmText !== "START" || !validateElectionStart(confirmAction.id).isValid)) ||
                 (confirmAction?.type === "close" && confirmText !== "CLOSE")
               }
               className={`font-semibold shadow-sm ${

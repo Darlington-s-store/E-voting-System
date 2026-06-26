@@ -684,6 +684,103 @@ export function getCandidatesForPosition(electionId: string, positionId: string)
   return candidates.filter((c) => c.electionId === electionId && c.positionId === positionId);
 }
 
+export interface ValidationCheckItem {
+  key: string;
+  label: string;
+  isValid: boolean;
+  message: string;
+}
+
+export interface ElectionValidationResult {
+  isValid: boolean;
+  checklist: ValidationCheckItem[];
+}
+
+export function validateElectionStart(electionId: string): ElectionValidationResult {
+  const election = elections.find((e) => e.id === electionId);
+  if (!election) {
+    return {
+      isValid: false,
+      checklist: [
+        { key: "exists", label: "Election Exists", isValid: false, message: "Election not found" },
+      ],
+    };
+  }
+
+  // 1. At least one position exists in this election
+  const electionPositions = positions.filter((p) => election.positionIds.includes(p.id));
+  const positionsValid = electionPositions.length > 0;
+  const positionsMessage = positionsValid
+    ? `${electionPositions.length} position(s) configured`
+    : "No positions are associated with this election";
+
+  // 2. At least one partylist exists in the system
+  const partylistsValid = partylists.length > 0;
+  const partylistsMessage = partylistsValid
+    ? `${partylists.length} partylist(s) registered`
+    : "No partylists registered in the system";
+
+  // 3. At least one nominee exists per position
+  let nomineesValid = true;
+  let nomineesMsg = "All positions have active nominees";
+  if (!positionsValid) {
+    nomineesValid = false;
+    nomineesMsg = "Requires configured positions first";
+  } else {
+    for (const pos of electionPositions) {
+      const posNominees = candidates.filter(
+        (c) => c.electionId === electionId && c.positionId === pos.id && c.status === "active",
+      );
+      if (posNominees.length === 0) {
+        nomineesValid = false;
+        nomineesMsg = `Position "${pos.name}" has no active nominees`;
+        break;
+      }
+    }
+    if (nomineesValid) {
+      const totalCandidates = candidates.filter(
+        (c) => c.electionId === electionId && c.status === "active",
+      ).length;
+      nomineesMsg = `${totalCandidates} total nominee(s) assigned across positions`;
+    }
+  }
+
+  // 4. At least one voter is registered in the system
+  const votersValid = voters.length > 0;
+  const votersMessage = votersValid
+    ? `${voters.length} voter(s) registered in the system`
+    : "No voters registered in the system";
+
+  const checklist: ValidationCheckItem[] = [
+    {
+      key: "positions",
+      label: "Contested Positions",
+      isValid: positionsValid,
+      message: positionsMessage,
+    },
+    {
+      key: "partylists",
+      label: "Registered Partylists",
+      isValid: partylistsValid,
+      message: partylistsMessage,
+    },
+    {
+      key: "nominees",
+      label: "Nominees per Position",
+      isValid: nomineesValid,
+      message: nomineesMsg,
+    },
+    { key: "voters", label: "Registered Voters", isValid: votersValid, message: votersMessage },
+  ];
+
+  const isValid = checklist.every((item) => item.isValid);
+
+  return {
+    isValid,
+    checklist,
+  };
+}
+
 // System Maintenance Utilities
 export const resetVoteCounts = () => {
   elections.forEach((e) => {
