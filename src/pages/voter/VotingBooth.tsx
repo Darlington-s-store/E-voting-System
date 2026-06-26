@@ -22,6 +22,10 @@ import {
   getCandidatesForPosition,
   partylists,
   type Candidate,
+  elections,
+  saveElections,
+  candidates as allCandidates,
+  saveCandidates,
 } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
@@ -98,6 +102,24 @@ export default function VotingBooth() {
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
+
+      // Increment votes cast for election
+      const currentElection = elections.find((e) => e.id === id);
+      if (currentElection) {
+        currentElection.votesCast = (currentElection.votesCast || 0) + 1;
+      }
+
+      // Increment votes for candidates
+      Object.entries(selections).forEach(([_, candidateId]) => {
+        const candidate = allCandidates.find((c) => c.id === candidateId);
+        if (candidate) {
+          candidate.votes = (candidate.votes || 0) + 1;
+        }
+      });
+
+      // Save to mock database (localStorage sync)
+      saveElections();
+      saveCandidates();
 
       // Save election cast state in localStorage
       const voted = localStorage.getItem("votesecure_voted_elections");
