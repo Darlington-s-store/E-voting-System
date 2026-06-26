@@ -13,6 +13,7 @@ import {
   Trash2,
   Flag,
   PlayCircle,
+  Zap,
 } from "lucide-react";
 import {
   elections,
@@ -382,6 +383,60 @@ export default function AdminDashboard() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Live Vote Activity Feed */}
+      <div className="rounded-xl bg-card border border-border p-6 shadow-soft">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold flex items-center gap-2">
+            <Zap className="w-4 h-4 text-warning" /> Live Vote Activity
+            {auditLogs.filter((l) => l.action === "VOTE").length > 0 && (
+              <span className="inline-flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success/15 text-success animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                LIVE
+              </span>
+            )}
+          </h3>
+          <span className="text-xs text-muted-foreground font-semibold">
+            {auditLogs.filter((l) => l.action === "VOTE").length} total vote(s)
+          </span>
+        </div>
+        {auditLogs.filter((l) => l.action === "VOTE").length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground">
+            <Zap className="w-8 h-8 mx-auto mb-3 opacity-30" />
+            <p className="text-sm font-semibold">No votes recorded yet</p>
+            <p className="text-xs mt-1">
+              Vote activity will appear here in real-time when voters cast their ballots.
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-border max-h-[320px] overflow-y-auto scrollbar-none">
+            {auditLogs
+              .filter((l) => l.action === "VOTE")
+              .slice(0, 15)
+              .map((l) => (
+                <li key={l.id} className="py-3 flex items-start gap-3 text-sm">
+                  <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Vote className="w-4 h-4 text-brand" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-foreground truncate">{l.user}</span>
+                      <span className="text-[10px] text-muted-foreground shrink-0 font-mono">
+                        {formatDistanceToNow(new Date(l.timestamp), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">{l.entity}</p>
+                    {l.details && (
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5 truncate">
+                        {l.details}
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+          </ul>
+        )}
       </div>
 
       <div className="rounded-xl bg-card border border-border p-6 shadow-soft">

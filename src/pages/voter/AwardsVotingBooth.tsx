@@ -26,6 +26,7 @@ import {
   saveElections,
   candidates as allCandidates,
   saveCandidates,
+  auditLogs,
 } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-store";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,24 @@ export default function AwardsVotingBooth() {
       // Save to mock database (localStorage sync)
       saveElections();
       saveCandidates();
+
+      // Log vote activity for admin visibility
+      const selectionSummary = Object.entries(selections)
+        .map(([_, candId]) => {
+          const cand = allCandidates.find((c) => c.id === candId);
+          return cand ? cand.name : candId;
+        })
+        .join(", ");
+      auditLogs.unshift({
+        id: `log-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        user: user?.name || "Anonymous Voter",
+        role: "voter",
+        action: "VOTE",
+        entity: `Awards: ${election.name}`,
+        ip: "192.168.1." + Math.floor(Math.random() * 254 + 1),
+        details: `Nominations cast for: ${selectionSummary}`,
+      });
 
       // Save election cast state in localStorage
       const voted = localStorage.getItem("votesecure_voted_elections");
